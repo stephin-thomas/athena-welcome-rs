@@ -9,4 +9,6 @@ anyhow = "1.0.79"
 dirs = "5.0.1"
 gtk = { version = "0.7.3", package = "gtk4", features = ["v4_12"] }
 lazy_static = "1.4.0"
+serde = {version = "1.0", features = ["derive"] }
+toml = "0.8.8"
 whoami = "1.4.1"
