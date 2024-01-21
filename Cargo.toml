@@ -1,0 +1,12 @@
+[package]
+name = "athena-welcome-rs"
+version = "0.1.0"
+edition = "2021"
+
+
+[dependencies]
+anyhow = "1.0.79"
+dirs = "5.0.1"
+gtk = { version = "0.7.3", package = "gtk4", features = ["v4_12"] }
+lazy_static = "1.4.0"
+whoami = "1.4.1"
