@@ -5,8 +5,8 @@ use gtk::{glib, Application};
 use lazy_static::lazy_static;
 use std::path::PathBuf;
 use whoami;
-mod configs;
 mod gui;
+mod settings;
 const APP_ID: &'static str = "org.athenaos.athena-welcome";
 const APP_NAME: &'static str = "athena-welcome";
 
@@ -23,7 +23,7 @@ lazy_static! {
 }
 
 fn main() -> glib::ExitCode {
-    configs::init_configs().unwrap();
+    settings::init_settings().unwrap();
     if whoami::username() == "liveuser" {
         println!("user is liveuser");
     }

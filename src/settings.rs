@@ -5,7 +5,7 @@ use std::fs;
 use std::fs::File;
 use std::io::Write;
 // Check if the config directory exist if not create them, Create and default config to settings file if it doesn't exist
-pub fn init_configs() -> Result<()> {
+pub fn init_settings() -> Result<()> {
     match &APP_CONFIG_DIR.try_exists() {
         Ok(res) => {
             if *res == true {
