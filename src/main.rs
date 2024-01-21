@@ -1,11 +1,12 @@
 use anyhow::{Context, Result};
 use dirs;
 use gtk::prelude::*;
-use gtk::{glib, Application, ApplicationWindow};
+use gtk::{glib, Application};
 use lazy_static::lazy_static;
 use std::path::PathBuf;
 use whoami;
 mod configs;
+mod gui;
 const APP_ID: &'static str = "org.athenaos.athena-welcome";
 const APP_NAME: &'static str = "athena-welcome";
 
@@ -30,22 +31,8 @@ fn main() -> glib::ExitCode {
     let app = Application::builder().application_id(APP_ID).build();
 
     // Connect to "activate" signal of `app`
-    app.connect_activate(build_ui);
+    app.connect_activate(gui::build_ui);
 
     // Run the application
     app.run()
-}
-
-fn build_ui(app: &Application) {
-    // Create a window and set the title
-    let window = ApplicationWindow::builder()
-        .application(app)
-        .title("Athena Welcome")
-        .default_height(250)
-        .default_width(920)
-        .icon_name(APP_NAME)
-        .build();
-
-    // Present window
-    window.present();
 }
