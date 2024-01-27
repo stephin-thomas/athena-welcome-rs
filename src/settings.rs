@@ -7,9 +7,10 @@ use std::fs::{self, File};
 use std::io::prelude::*;
 use std::io::Write;
 use std::path::Path;
+use strum_macros::EnumIter;
 use toml;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, EnumIter, Clone)]
 pub enum Role {
     None,
     BlueTeamer,
@@ -29,7 +30,7 @@ pub enum Role {
 impl fmt::Display for Role {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Role::None => write!(f, "None"),
+            Role::None => write!(f, "🔥 Choose your Role 🔥"),
             Role::BlueTeamer => write!(f, "💙 Blue Teamer 💙"),
             Role::BugBountHunter => write!(f, "🐞 Bug Bounty Hunter 🐞"),
             Role::CrackerSpecialist => write!(f, "🍘 Cracker Specialist 🍘"),
@@ -46,68 +47,80 @@ impl fmt::Display for Role {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
-    autostart: bool,
-    role: Role, // Add other fields as needed
+    pub autostart: bool,
+    pub role: Role, // Add other fields as needed
 }
 
-// Check if the config directory exist if not create them, Create and default config to settings file if it doesn't exist
-pub fn init_settings() -> Result<()> {
-    match APP_CONFIG_DIR.try_exists() {
-        Ok(res) => {
-            if res == false {
-                // Create config Directory
-                fs::create_dir_all(&APP_CONFIG_DIR.as_path())
-                    .context("error creating config directories")?
+impl Config {
+    // Create and save default config to settings file if it doesn't exist
+    pub fn init() -> Result<()> {
+        match APP_CONFIG_DIR.try_exists() {
+            Ok(res) => {
+                if res == false {
+                    // Create config Directory
+                    fs::create_dir_all(&APP_CONFIG_DIR.as_path())
+                        .context("error creating config directories")?
+                }
             }
-        }
-        Err(err) => {
-            return Err(anyhow!(
-                "Determining if config dir exists failed with\n  {}",
-                err
-            ));
-        }
-    };
-    // Create a file
-    match File::options()
-        .write(true)
-        .create_new(true)
-        .open(SETTINGS_PATH.as_path())
-    {
-        Ok(mut settings_file) => {
-            let config = Config {
-                autostart: true,
-                role: Role::None,
-            };
+            Err(err) => {
+                return Err(anyhow!(
+                    "Determining if config dir exists failed with\n  {}",
+                    err
+                ));
+            }
+        };
+        // Create a file
+        match File::options()
+            .write(true)
+            .create_new(true)
+            .open(SETTINGS_PATH.as_path())
+        {
+            Ok(_) => {
+                let config = Config {
+                    autostart: true,
+                    role: Role::None,
+                };
 
-            // Write contents to the file
-            let _bytes_writtern = settings_file.write(
-                toml::to_string(&config)
-                    .context("Error serialising default configs")?
-                    .as_bytes(),
-            )?;
-            // let _bytes_writtern = settings_file.write("autostart=True\nrole=none".as_bytes())?;
-            Ok(())
-        }
-        Err(err) => match err.kind() {
-            std::io::ErrorKind::AlreadyExists => {
-                println!("Existing settings file found");
+                config.save()?;
+                // let _bytes_writtern = settings_file.write("autostart=True\nrole=none".as_bytes())?;
                 Ok(())
             }
-            _ => return Err(anyhow!("Error saving settings file due to\n  {}", err)),
-        },
+            Err(err) => match err.kind() {
+                std::io::ErrorKind::AlreadyExists => {
+                    println!("Existing settings file found");
+                    Ok(())
+                }
+                _ => return Err(anyhow!("Error saving settings file due to\n  {}", err)),
+            },
+        }
     }
-}
 
-// Load settings from settings.conf file
-pub fn load_settings() -> Result<Config> {
-    let settings = toml::from_str(
-        read_text_file(SETTINGS_PATH.as_path())
-            .context("Error reading settings file. Unable to open")?
-            .as_str(),
-    )?;
-    return Ok(settings);
+    // Load configs from settings.conf file
+    pub fn load() -> Result<Config> {
+        let config = toml::from_str(
+            read_text_file(SETTINGS_PATH.as_path())
+                .context("Error reading settings file. Unable to open")?
+                .as_str(),
+        )?;
+        return Ok(config);
+    }
+
+    // Save the config
+    pub fn save(&self) -> Result<(), anyhow::Error> {
+        let mut settings_file = File::options()
+            .truncate(true)
+            .write(true)
+            .open(SETTINGS_PATH.as_path())
+            .unwrap();
+        let _bytes_written = settings_file.write(
+            toml::to_string(&self)
+                .context("Error serialising default configs")?
+                .as_bytes(),
+        )?;
+        Ok(())
+    }
 }
 
 // Read content of text file to string
