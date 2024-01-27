@@ -6,6 +6,7 @@ use lazy_static::lazy_static;
 use std::path::PathBuf;
 mod gui;
 mod settings;
+mod utils;
 const APP_ID: &'static str = "org.athenaos.athena-welcome";
 const APP_NAME: &'static str = "athena-welcome";
 
@@ -22,7 +23,7 @@ lazy_static! {
 }
 
 fn main() -> glib::ExitCode {
-    settings::init_settings().unwrap();
+    settings::Config::init().unwrap();
     // Create a new application
     let app = Application::builder().application_id(APP_ID).build();
 
