@@ -1,20 +1,27 @@
 use anyhow::{Context, Result};
 use dirs;
+use gtk::glib;
 use gtk::prelude::*;
-use gtk::{glib, Application};
 use lazy_static::lazy_static;
 use std::path::PathBuf;
+use std::sync::OnceLock;
+use tokio::runtime::Runtime;
 mod gui;
 mod settings;
 mod utils;
-const APP_ID: &'static str = "org.athenaos.athena-welcome";
-const APP_NAME: &'static str = "athena-welcome";
+const APP_ID: &str = "org.athenaos.athena-welcome";
+const APP_NAME: &str = "athena-welcome";
+
+fn runtime() -> &'static Runtime {
+    static RUNTIME: OnceLock<Runtime> = OnceLock::new();
+    RUNTIME.get_or_init(|| Runtime::new().expect("Setting up tokio runtime needs to succeed."))
+}
 
 fn get_app_config_dir() -> Result<PathBuf> {
     let mut usr_config_dir: PathBuf =
         dirs::config_dir().context("Could not find user config directory")?;
-    usr_config_dir.push(&APP_NAME);
-    return Ok(usr_config_dir);
+    usr_config_dir.push(APP_NAME);
+    Ok(usr_config_dir)
 }
 
 lazy_static! {
@@ -25,7 +32,7 @@ lazy_static! {
 fn main() -> glib::ExitCode {
     settings::Config::init().unwrap();
     // Create a new application
-    let app = Application::builder().application_id(APP_ID).build();
+    let app = adw::Application::builder().application_id(APP_ID).build();
 
     // Connect to "activate" signal of `app`
     app.connect_activate(gui::build_ui);
