@@ -2,6 +2,7 @@ use super::{gobjects, logic};
 use crate::runtime;
 use crate::settings;
 use crate::settings::Config;
+use crate::utils::start_cmd;
 use adw::glib::clone;
 use adw::prelude::*;
 use adw::ApplicationWindow;
@@ -163,8 +164,7 @@ pub fn draw(
         // Connect to "clicked" signal of `button`
         btn_upgrade.connect_clicked(move |_| {
             runtime().spawn(clone!(@strong sender => async move {
-                 // let response = logic::start_cmd("shell-rocket", &["sudo nix-channel --update; sudo nixos-rebuild switch"] ).await;
-                let response = logic::start_cmd("ls", &["/home/stephin/"] ).await;
+                let response = start_cmd("shell-rocket", &["sudo nix-channel --update; sudo nixos-rebuild switch"] ).await;
                 sender.send(response).await.expect("The channel needs to be open.");
             }));
         });
