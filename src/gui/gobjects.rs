@@ -1,5 +1,6 @@
-use gtk::glib;
-use gtk::prelude::*;
+use adw::prelude::*;
+// use adw::subclass::prelude::*;
+use adw::glib;
 
 pub(crate) fn btn_n_ttp_label(
     text: &str,
