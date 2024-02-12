@@ -58,9 +58,9 @@ impl Config {
     pub fn init() -> Result<()> {
         match APP_CONFIG_DIR.try_exists() {
             Ok(res) => {
-                if res == false {
+                if !res {
                     // Create config Directory
-                    fs::create_dir_all(&APP_CONFIG_DIR.as_path())
+                    fs::create_dir_all(APP_CONFIG_DIR.as_path())
                         .context("error creating config directories")?
                 }
             }
@@ -92,7 +92,7 @@ impl Config {
                     println!("Existing settings file found");
                     Ok(())
                 }
-                _ => return Err(anyhow!("Error saving settings file due to\n  {}", err)),
+                _ => Err(anyhow!("Error saving settings file due to\n  {}", err)),
             },
         }
     }
@@ -104,7 +104,7 @@ impl Config {
                 .context("Error reading settings file. Unable to open")?
                 .as_str(),
         )?;
-        return Ok(config);
+        Ok(config)
     }
 
     // Save the config
