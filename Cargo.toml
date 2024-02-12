@@ -14,3 +14,7 @@ toml = "0.8.8"
 whoami = "1.4.1"
 strum = "0.25"
 strum_macros = "0.25"
+adw = { version = "0.5.3", package = "libadwaita", features = ["v1_4"] }
+reqwest = { version = "0.11.23", default-features = false, features = ["rustls-tls"] }
+tokio = { version = "1", features = ["process", "rt-multi-thread"] }
+async-channel = "2.2.0"
