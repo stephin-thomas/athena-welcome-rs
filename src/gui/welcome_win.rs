@@ -60,11 +60,10 @@ pub fn draw(
         70,
         "<span size='large'><b>Update Nix channels</b></span>",
     );
-    let toast_rc = toast.clone();
-    btn_channels.connect_clicked(move |_| {
-        toast_rc.add_toast(adw::Toast::new("Updating nix channels"));
+    btn_channels.connect_clicked(clone!(@strong toast =>move |_| {
+        toast.add_toast(adw::Toast::new("Updating nix channels"));
         println!("Toast clicked")
-    });
+    }));
 
     let btn_rel_info = gobjects::btn_n_ttp_label("Release info", None, 200, 50);
 
@@ -80,8 +79,7 @@ pub fn draw(
     let btn_wiki = gobjects::btn_n_ttp_label("Wiki", None, 200, 50);
     let btn_quit = gobjects::btn_n_ttp_label("Quit", None, 200, 50);
 
-    let window_clone = window.clone();
-    btn_quit.connect_clicked(move |btn| window_clone.close());
+    btn_quit.connect_clicked(clone!(@strong window=>move |_| window.close()));
     let btn_donate = gobjects::create_btn(200, 20, "<b>Donate</b>");
     btn_quit.set_css_classes(&["destructive-action"]);
     hbox_vec[6].append(&btn_discord);
