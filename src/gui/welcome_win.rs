@@ -160,12 +160,13 @@ pub fn draw(
             gobjects::btn_n_ttp_label("Upgrade Athena", Some("Upgrade Athena"), 300, 0);
 
         // Connect to "clicked" signal of `button`
-        btn_upgrade.connect_clicked(move |_| {
+        btn_upgrade.connect_clicked(clone!(@strong toast=>move |_| {
+            toast.add_toast(adw::Toast::new("Updating nix channels"));
             runtime().spawn(clone!(@strong sender => async move {
                 let response = start_cmd("shell-rocket", &["sudo nix-channel --update; sudo nixos-rebuild switch"] ).await;
                 sender.send(response).await.expect("The channel needs to be open.");
             }));
-        });
+        }));
 
         let btn_hacking_var = gobjects::btn_n_ttp_label(
             "Hacking Variables",
@@ -192,9 +193,6 @@ pub fn draw(
             "<span size='large'><b>Installation (Online)</b></span>",
         );
         btn_non_linstall.set_halign(Align::Center);
-        // grd.attach(&btn_gparted, 2, 2, 2, 2);
-        // grd.attach(&btn_channels, 4, 2, 2, 2);
-        // grd.attach(&btn_non_linstall, 3, 0, 2, 2);
         hbox_vec[3].append(&btn_gparted);
         hbox_vec[2].append(&btn_non_linstall);
     }
@@ -210,7 +208,6 @@ pub fn draw(
             cl_configs.borrow().save().unwrap();
         };
     });
-    // hbox_vec[7].append(toast.clone().as_ref());
     auto_start_checkbox.set_halign(gtk::Align::End);
 
     hbox_vec[7].append(&label_warning);
@@ -223,7 +220,10 @@ pub fn draw(
     // The main loop executes the asynchronous block
     glib::spawn_future_local(async move {
         while let Ok(success) = receiver.recv().await {
-            let toast_msg = format!("Operation :- {:?}", success);
+            let toast_msg = format!(
+                "Operation :- {:?}",
+                { || if success { "Success" } else { "Failed" } }()
+            );
             toast.add_toast(adw::Toast::new(&toast_msg));
         }
     });
