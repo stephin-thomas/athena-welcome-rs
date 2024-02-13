@@ -14,19 +14,24 @@ pub async fn start_cmd(cmd: &str, args: &[&str]) -> bool {
         .map(|&val| val.to_owned())
         .collect::<Vec<String>>();
 
-    let output = Command::new(cmd_owned)
-        .args(args_owned)
-        .output()
-        .await
-        .unwrap();
-    println!(
-        "STDOUT :\n {:?}",
-        std::str::from_utf8(&output.stdout).unwrap(),
-    );
-    println!(
-        "STDERR :\n {:?}",
-        std::str::from_utf8(&output.stderr).unwrap()
-    );
+    let output = Command::new(&cmd_owned).args(&args_owned).output().await;
+    match output {
+        Ok(output_run) => {
+            println!("command:- {cmd_owned} {args_owned:?}");
+            println!(
+                "STDOUT :\n {:?}",
+                std::str::from_utf8(&output_run.stdout).unwrap(),
+            );
+            println!(
+                "STDERR :\n {:?}",
+                std::str::from_utf8(&output_run.stderr).unwrap()
+            );
 
-    output.status.success()
+            output_run.status.success()
+        }
+        Err(err) => {
+            println!("Error running {cmd_owned} {args_owned:?}\n {}", err);
+            false
+        }
+    }
 }
