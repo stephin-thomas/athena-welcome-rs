@@ -1,7 +1,7 @@
 use tokio::process::Command;
 
 async fn check_internet() -> bool {
-    match reqwest::get("https://www.google.com").await {
+    match reqwest::get("https://www.bing.com").await {
         Ok(_) => true,
         Err(_) => false,
     }
