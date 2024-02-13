@@ -225,11 +225,8 @@ pub fn draw(
     // The main loop executes the asynchronous block
     glib::spawn_future_local(async move {
         while let Ok(success) = receiver.recv().await {
-            if success {
-                println!("Status: success");
-            } else {
-                println!("Status: failure");
-            }
+            let toast_msg = format!("Operation :- {:?}", success);
+            toast.add_toast(adw::Toast::new(&toast_msg));
         }
     });
 
