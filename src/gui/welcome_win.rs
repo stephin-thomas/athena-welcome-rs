@@ -2,7 +2,7 @@ use super::{gobjects, logic};
 use crate::runtime;
 use crate::settings;
 use crate::settings::Config;
-use crate::utils::start_cmd;
+use crate::utils::{get_widget_by_name, start_cmd};
 use adw::glib::clone;
 use adw::prelude::*;
 use adw::ApplicationWindow;
@@ -13,12 +13,14 @@ use gtk::{Box, Orientation};
 use std::cell::RefCell;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
+use tokio::time::{sleep, Duration};
 pub fn draw(
     configs: Rc<RefCell<Config>>,
     window: Rc<ApplicationWindow>,
     toast: Rc<adw::ToastOverlay>,
 ) -> Result<Box> {
-    let (sender, receiver) = async_channel::bounded(1);
+    let (btn_dis_send, btn_dis_receiver) = async_channel::bounded(1);
+    let (toast_sen, toast_rec) = async_channel::bounded(1);
     let vbox = Box::builder()
         .orientation(Orientation::Vertical)
         .spacing(10)
@@ -62,8 +64,9 @@ pub fn draw(
     );
     btn_channels.connect_clicked(clone!(@strong toast =>move |_| {
         toast.add_toast(adw::Toast::new("Updating nix channels"));
-        println!("Toast clicked")
-    }));
+            runtime().spawn(async move {
+                let response = start_cmd("pkexec", &["nix-channel","--update"] ).await;
+            });}));
 
     let btn_rel_info = gobjects::btn_n_ttp_label("Release info", None, 200, 50);
 
@@ -160,11 +163,29 @@ pub fn draw(
             gobjects::btn_n_ttp_label("Upgrade Athena", Some("Upgrade Athena"), 300, 0);
 
         // Connect to "clicked" signal of `button`
-        btn_upgrade.connect_clicked(clone!(@strong toast=>move |_| {
-            toast.add_toast(adw::Toast::new("Updating nix channels"));
-            runtime().spawn(clone!(@strong sender => async move {
-                let response = start_cmd("shell-rocket", &["sudo nix-channel --update; sudo nixos-rebuild switch"] ).await;
-                sender.send(response).await.expect("The channel needs to be open.");
+        btn_upgrade.connect_clicked(clone!(@strong btn_dis_send,@strong toast =>move |btn| {
+            btn.set_sensitive(false);
+            btn.set_widget_name("UPbtn");
+            let btn_id= btn.widget_name().to_string();
+            println!("Widget name is {:?}",btn_id);
+            runtime().spawn(clone!(@strong btn_dis_send ,@strong toast_sen => async move {
+                let res = start_cmd("shell-rocket", &["sudo nix-channel --update; sudo nixos-rebuild switch"] ).await;
+                if res.as_ref().is_some(){
+                    let result=res.unwrap();
+                    if result.status.success(){
+                    toast_sen.send("Task successfully completed".to_owned()).await.expect("Error opening channel");
+                    }
+                    else{
+                    toast_sen.send(format!("Task failed with error code {}",result.status)).await.expect("Error opening channel");
+                    }
+                }
+                else{
+                    
+                    toast_sen.send("Error make sure all the dependencies installed".to_owned()).await.expect("Error opening channel");
+                }
+               //Remove the following line important. Only for testing 
+                sleep(Duration::from_millis(3000)).await;
+                btn_dis_send.send(btn_id).await.expect("Error sending through channel");
             }));
         }));
 
@@ -219,12 +240,16 @@ pub fn draw(
 
     // The main loop executes the asynchronous block
     glib::spawn_future_local(async move {
-        while let Ok(success) = receiver.recv().await {
-            let toast_msg = format!(
-                "Operation :- {:?}",
-                { || if success { "Success" } else { "Failed" } }()
-            );
-            toast.add_toast(adw::Toast::new(&toast_msg));
+        loop {
+            if let Ok(msg) = btn_dis_receiver.recv().await {
+                if let Some(btn) = get_widget_by_name(&hbox_vec, msg.as_str()) {
+                    print!("found button that is working ");
+                    btn.set_sensitive(true);
+                };
+            }
+            if let Ok(msg) = toast_rec.recv().await {
+                toast.add_toast(adw::Toast::new(msg.as_str()));
+            }
         }
     });
 
