@@ -108,17 +108,17 @@ pub fn draw(
         let roles: Vec<&str> = roles_string.iter().map(String::as_ref).collect();
         let role_dropdown = gtk::DropDown::from_strings(roles.as_slice());
         role_dropdown.set_size_request(200, 1);
-        let configs_rc = Rc::clone(&configs);
         let pos = roles
             .iter()
             .position(|&v| {
-                let cur_role = &configs_rc.borrow().role;
+                let cur_role = &configs.borrow().role;
                 v == cur_role.to_string()
             })
             .context("error getting roles")?;
         role_dropdown.set_selected(pos as u32);
         role_dropdown.set_halign(gtk::Align::End);
-        role_dropdown.connect_selected_notify(move |signal| {
+        // let configs_rc_cl = Rc::clone(&configs_rc);
+        role_dropdown.connect_selected_notify(clone!(@strong configs =>move |signal| {
             let sign = signal.selected();
             let role = settings::Role::iter()
                 .enumerate()
@@ -133,10 +133,11 @@ pub fn draw(
                 )
                 .unwrap();
             {
-                configs_rc.borrow_mut().role = role.1;
+                configs.borrow_mut().role = role.1;
             }
-            println!("Signal Called {:?}", configs_rc.borrow());
-        });
+                configs.borrow().save().unwrap();
+            println!("Signal Called {:?}", configs.borrow());
+        }));
 
         let btn_htb = gobjects::gen_img_btn(
             "assets/htb.png",
@@ -167,6 +168,19 @@ pub fn draw(
         hbox_vec[2].append(&btn_tool);
         let btn_rtm =
             gobjects::create_btn(300, 70, "<span size='large'><b>Set Your Role</b></span>");
+        btn_rtm.connect_clicked(
+            clone!(@strong btn_dis_send,@strong toast_sen, @strong configs=>move |btn| {
+                btn.set_sensitive(false);
+                btn.set_widget_name("btn_rtm");
+                let btn_id= btn.widget_name().to_string();
+                let rtm_cmd:String=format!("sudo cyber-toolkit {:?}",configs.borrow().role);
+                runtime().spawn(clone!(@strong btn_dis_send ,@strong toast_sen => async move {
+                    let res = start_cmd("shell-rocket", &[rtm_cmd.as_str()] ).await;
+                    process_click(res,toast_sen ,btn_dis_send , btn_id).await;
+                }));
+            }),
+        );
+
         hbox_vec[3].append(&btn_rtm);
         let btn_role_tools = gobjects::btn_n_ttp_label(
             "Show Tools for Roles",
@@ -214,16 +228,14 @@ pub fn draw(
     }
 
     hbox_vec[3].append(&btn_channels);
-    let cl_configs = Rc::clone(&configs);
+    // let configs = Rc::clone(&configs);
     let auto_start_checkbox = gtk::CheckButton::with_label("Autostart");
-    auto_start_checkbox.set_active(cl_configs.borrow().autostart);
-    auto_start_checkbox.connect_toggled(move |check_btn| {
-        cl_configs.borrow_mut().autostart = check_btn.is_active();
-        println!("Signal Called {:?}", cl_configs.borrow());
-        {
-            cl_configs.borrow().save().unwrap();
-        };
-    });
+    auto_start_checkbox.set_active(configs.borrow().autostart);
+    auto_start_checkbox.connect_toggled(clone!(@strong configs  =>move |check_btn| {
+        configs.borrow_mut().autostart = check_btn.is_active();
+        println!("Signal Called {:?}", configs.borrow());
+        configs.borrow().save().unwrap();
+    }));
     auto_start_checkbox.set_halign(gtk::Align::End);
 
     hbox_vec[7].append(&label_warning);
