@@ -1,4 +1,3 @@
-use adw::prelude::*;
 use tokio::process::Command;
 
 async fn check_internet() -> bool {
@@ -38,18 +37,4 @@ pub async fn start_cmd(cmd: &str, args: &[&str]) -> Option<std::process::Output>
             None
         }
     }
-}
-pub(crate) fn get_widget_by_name(hbox_vec: &Vec<gtk::Box>, name: &str) -> Option<gtk::Widget> {
-    for hbx in hbox_vec.iter() {
-        let mut child = hbx.first_child();
-        while child.is_some() {
-            if child.as_ref().unwrap().widget_name() == name {
-                return child;
-            } else {
-                child = child.unwrap().next_sibling();
-                continue;
-            }
-        }
-    }
-    None
 }

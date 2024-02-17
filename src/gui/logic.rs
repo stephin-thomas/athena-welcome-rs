@@ -1,3 +1,7 @@
+use adw::prelude::*;
+use async_channel::Sender;
+use std::process::Output;
+use tokio::time::{sleep, Duration};
 use whoami;
 
 pub(crate) fn is_live_user() -> bool {
@@ -24,4 +28,50 @@ through Discord or GitHub.\n\
     Open a <b>ticket</b> for any issues or proposals.\n\
 Learn, study and have fun!")
     }
+}
+pub(crate) fn get_widget_by_name(hbox_vec: &Vec<gtk::Box>, name: &str) -> Option<gtk::Widget> {
+    for hbx in hbox_vec.iter() {
+        let mut child = hbx.first_child();
+        while child.is_some() {
+            if child.as_ref().unwrap().widget_name() == name {
+                return child;
+            } else {
+                child = child.unwrap().next_sibling();
+                continue;
+            }
+        }
+    }
+    None
+}
+pub(crate) async fn process_click(
+    res: Option<Output>,
+    toast_sen: Sender<String>,
+    btn_dis_send: Sender<String>,
+    btn_id: String,
+) {
+    if res.as_ref().is_some() {
+        let result = res.unwrap();
+        if result.status.success() {
+            toast_sen
+                .send("Task successfully completed".to_owned())
+                .await
+                .expect("Error opening channel");
+        } else {
+            toast_sen
+                .send(format!("Task failed with error code {}", result.status))
+                .await
+                .expect("Error opening channel");
+        }
+    } else {
+        toast_sen
+            .send("Error make sure all the dependencies installed".to_owned())
+            .await
+            .expect("Error opening channel");
+    }
+    //Remove the following line important. Only for testing
+    sleep(Duration::from_millis(3000)).await;
+    btn_dis_send
+        .send(btn_id)
+        .await
+        .expect("Error sending through channel");
 }
