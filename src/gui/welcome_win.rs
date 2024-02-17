@@ -1,8 +1,9 @@
-use super::{gobjects, logic};
+use super::gobjects;
+use super::logic::{get_startup_text, get_widget_by_name, is_live_user, process_click};
 use crate::runtime;
 use crate::settings;
 use crate::settings::Config;
-use crate::utils::{get_widget_by_name, start_cmd};
+use crate::utils::start_cmd;
 use adw::glib::clone;
 use adw::prelude::*;
 use adw::ApplicationWindow;
@@ -13,7 +14,6 @@ use gtk::{Box, Orientation};
 use std::cell::RefCell;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
-use tokio::time::{sleep, Duration};
 pub fn draw(
     configs: Rc<RefCell<Config>>,
     window: Rc<ApplicationWindow>,
@@ -53,7 +53,7 @@ pub fn draw(
 
     //Label2
     let label_2 = gobjects::create_generic_label(gtk::Justification::Center);
-    label_2.set_markup(logic::get_startup_text().as_str());
+    label_2.set_markup(get_startup_text().as_str());
     hbox_vec[1].set_halign(gtk::Align::Center);
     hbox_vec[1].append(&label_2);
 
@@ -62,11 +62,18 @@ pub fn draw(
         70,
         "<span size='large'><b>Update Nix channels</b></span>",
     );
-    btn_channels.connect_clicked(clone!(@strong toast =>move |_| {
-        toast.add_toast(adw::Toast::new("Updating nix channels"));
-            runtime().spawn(async move {
+    btn_channels.connect_clicked(
+        clone!(@strong toast,@strong toast_sen, @strong btn_dis_send =>move |btn| {
+            btn.set_sensitive(false);
+            btn.set_widget_name("UdtNix");
+            let btn_id= btn.widget_name().to_string();
+            toast.add_toast(adw::Toast::new("Updating nix channels"));
+
+            runtime().spawn(clone!(@strong toast_sen, @strong btn_dis_send =>async move {
                 let response = start_cmd("pkexec", &["nix-channel","--update"] ).await;
-            });}));
+                process_click(response,toast_sen ,btn_dis_send , btn_id).await;
+                            }));}),
+    );
 
     let btn_rel_info = gobjects::btn_n_ttp_label("Release info", None, 200, 50);
 
@@ -93,7 +100,7 @@ pub fn draw(
     hbox_vec[6].set_spacing(10);
     //label warning
     let label_warning = gobjects::create_generic_label(gtk::Justification::Center);
-    if !logic::is_live_user() {
+    if !is_live_user() {
         //Drop box
         let roles_string: Vec<String> = settings::Role::iter()
             .map(|role| role.to_string())
@@ -137,6 +144,15 @@ pub fn draw(
             300,
             50,
         );
+        btn_htb.connect_clicked(clone!(@strong btn_dis_send,@strong toast_sen =>move |btn| {
+            btn.set_sensitive(false);
+            btn.set_widget_name("Upgdbtn");
+            let btn_id= btn.widget_name().to_string();
+            runtime().spawn(clone!(@strong btn_dis_send ,@strong toast_sen => async move {
+                let res = start_cmd("shell-rocket", &["htb-toolkit -u"] ).await;
+                process_click(res,toast_sen ,btn_dis_send , btn_id).await;
+            }));
+        }));
 
         let btn_tool = gobjects::gen_img_btn(
             "assets/tools_recipe.png",
@@ -165,27 +181,11 @@ pub fn draw(
         // Connect to "clicked" signal of `button`
         btn_upgrade.connect_clicked(clone!(@strong btn_dis_send,@strong toast =>move |btn| {
             btn.set_sensitive(false);
-            btn.set_widget_name("UPbtn");
+            btn.set_widget_name("Upgdbtn");
             let btn_id= btn.widget_name().to_string();
-            println!("Widget name is {:?}",btn_id);
             runtime().spawn(clone!(@strong btn_dis_send ,@strong toast_sen => async move {
                 let res = start_cmd("shell-rocket", &["sudo nix-channel --update; sudo nixos-rebuild switch"] ).await;
-                if res.as_ref().is_some(){
-                    let result=res.unwrap();
-                    if result.status.success(){
-                    toast_sen.send("Task successfully completed".to_owned()).await.expect("Error opening channel");
-                    }
-                    else{
-                    toast_sen.send(format!("Task failed with error code {}",result.status)).await.expect("Error opening channel");
-                    }
-                }
-                else{
-                    
-                    toast_sen.send("Error make sure all the dependencies installed".to_owned()).await.expect("Error opening channel");
-                }
-               //Remove the following line important. Only for testing 
-                sleep(Duration::from_millis(3000)).await;
-                btn_dis_send.send(btn_id).await.expect("Error sending through channel");
+                process_click(res,toast_sen ,btn_dis_send , btn_id).await;
             }));
         }));
 
@@ -201,11 +201,6 @@ pub fn draw(
         hbox_vec[4].append(&btn_upgrade);
         hbox_vec[4].append(&btn_hacking_var);
     } else {
-        // let grd = gtk::Grid::builder()
-        //     .column_homogeneous(true)
-        //     .row_homogeneous(true)
-        //     .build();
-
         let btn_gparted =
             gobjects::create_btn(300, 70, "<span size='large'><b>Run GParted</b></span>");
         let btn_non_linstall = gobjects::create_btn(
