@@ -1,3 +1,5 @@
+use std::ffi::OsStr;
+
 use tokio::process::Command;
 
 async fn check_internet() -> bool {
@@ -7,17 +9,20 @@ async fn check_internet() -> bool {
     }
 }
 
-pub async fn start_cmd(cmd: &str, args: &[&str]) -> Option<std::process::Output> {
+pub async fn start_cmd<I, S>(cmd: &str, args: I) -> Option<std::process::Output>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
     let cmd_owned = cmd.to_owned();
-    let args_owned = args
-        .into_iter()
-        .map(|&val| val.to_owned())
-        .collect::<Vec<String>>();
+    // let args_owned = args
+    //     .into_iter()
+    //     .map(|&val| val.to_owned())
+    //     .collect::<Vec<String>>();
 
-    let output = Command::new(&cmd_owned).args(&args_owned).output().await;
+    let output = Command::new(&cmd_owned).args(args).output().await;
     match output {
         Ok(output_run) => {
-            println!("command:- {cmd_owned} {args_owned:?}");
             if output_run.status.success() {
                 println!(
                     "STDOUT :\n {:?}",
@@ -33,7 +38,7 @@ pub async fn start_cmd(cmd: &str, args: &[&str]) -> Option<std::process::Output>
             Some(output_run)
         }
         Err(err) => {
-            println!("Error running {cmd_owned} {args_owned:?}\n {}", err);
+            println!("Error running {cmd_owned}\n {}", err);
             None
         }
     }

@@ -14,7 +14,7 @@ use toml;
 pub enum Role {
     None,
     BlueTeamer,
-    BugBountHunter,
+    BugBountyHunter,
     CrackerSpecialist,
     DoSTester,
     EnthusiastStudent,
@@ -32,7 +32,7 @@ impl fmt::Display for Role {
         match self {
             Role::None => write!(f, "🔥 Choose your Role 🔥"),
             Role::BlueTeamer => write!(f, "💙 Blue Teamer 💙"),
-            Role::BugBountHunter => write!(f, "🐞 Bug Bounty Hunter 🐞"),
+            Role::BugBountyHunter => write!(f, "🐞 Bug Bounty Hunter 🐞"),
             Role::CrackerSpecialist => write!(f, "🍘 Cracker Specialist 🍘"),
             Role::DoSTester => write!(f, "💀 DoS Tester 💀"),
             Role::EnthusiastStudent => write!(f, "🎓 Enthusiast Student 🎓"),
@@ -119,6 +119,7 @@ impl Config {
                 .context("Error serialising default configs")?
                 .as_bytes(),
         )?;
+        println!("Config Updated {:?}", &self);
         Ok(())
     }
 }
