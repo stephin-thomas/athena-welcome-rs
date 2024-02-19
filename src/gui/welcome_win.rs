@@ -35,7 +35,7 @@ pub fn draw(
             btn.set_sensitive(false);
             btn.set_widget_name(widget_name);
             let btn_id= btn.widget_name().to_string();
-
+            println!("Shell started for {} {:?}",cmd,args);
             runtime().spawn(clone!(@strong toast_sen, @strong btn_dis_send =>async move {
                 let response = start_cmd(cmd, args ).await;
                 process_click(response,toast_sen ,btn_dis_send , btn_id).await;
@@ -44,8 +44,11 @@ pub fn draw(
             btn.set_sensitive(false);
             btn.set_widget_name(widget_name);
             let btn_id= btn.widget_name().to_string();
-            // let args_vec = args.into_iter().map(|str_val|str_val).collect::<Vec<&str>>();
+            println!("Shell started for {} {:?}",cmd,args);
+            if args[0]=="none"{
+        }
             runtime().spawn(clone!(@strong toast_sen, @strong btn_dis_send =>async move {
+            toast_sen.send("Role of none selected try again".to_owned()).await.expect("error opening channels");
                 let response = start_cmd(cmd, args.as_slice() ).await;
                 process_click(response,toast_sen ,btn_dis_send , btn_id).await;
                             }));});
@@ -129,6 +132,10 @@ pub fn draw(
 
     btn_quit.connect_clicked(clone!(@strong window=>move |_| window.close()));
     let btn_donate = gobjects::create_btn(200, 20, "<b>Donate</b>");
+    btn_donate.connect_clicked(clone!(@strong open_url=>move |_| {
+        open_url("https://github.com/sponsors/Athena-OS");
+    }));
+
     btn_quit.set_css_classes(&["destructive-action"]);
     hbox_vec[6].append(&btn_discord);
     hbox_vec[6].append(&btn_demo);
@@ -197,7 +204,7 @@ pub fn draw(
         hbox_vec[2].set_valign(gtk::Align::Center);
         hbox_vec[2].set_margin_top(10);
         hbox_vec[2].append(&btn_tool);
-        let rtm_cmd: String = format!("sudo cyber-toolkit {:?}", configs.borrow().role);
+        let rtm_cmd: String = format!("sudo cyber-toolkit {:?}", configs.borrow().role.id());
         let btn_rtm =
             gobjects::create_btn(300, 70, "<span size='large'><b>Set Your Role</b></span>");
         btn_rtm.connect_clicked(clone!(@strong cmd_on_click_owned=>move |btn|{

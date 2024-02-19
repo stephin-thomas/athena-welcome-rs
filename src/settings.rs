@@ -26,7 +26,25 @@ pub enum Role {
     RedTeamer,
     WebPentester,
 }
-
+impl Role {
+    pub fn id(&self) -> &'static str {
+        match self {
+            Role::None => "none",
+            Role::BlueTeamer => "blue",
+            Role::BugBountyHunter => "bugbounty",
+            Role::CrackerSpecialist => "cracker",
+            Role::DoSTester => "dos",
+            Role::EnthusiastStudent => "student",
+            Role::ForensicAnalyst => "forensic",
+            Role::MalwareAnalyst => "malware",
+            Role::MobileAnalyst => "mobile",
+            Role::NetworkAnalyst => "network",
+            Role::OSINTSpecialist => "osint",
+            Role::RedTeamer => "red",
+            Role::WebPentester => "web",
+        }
+    }
+}
 impl fmt::Display for Role {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
