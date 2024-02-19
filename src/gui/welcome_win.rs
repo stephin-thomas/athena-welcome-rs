@@ -197,13 +197,7 @@ pub fn draw(
         hbox_vec[2].set_valign(gtk::Align::Center);
         hbox_vec[2].set_margin_top(10);
         hbox_vec[2].append(&btn_tool);
-        // let rtm_cmd: &'static str =
-        //     std::boxed::Box::new(format!("sudo cyber-toolkit {:?}", configs.borrow().role)).leak();
-        // let rtm_cmd =
-        // std::boxed::Box::new(format!("sudo cyber-toolkit {:?}", configs.borrow().role));
-        // let rtm_cmd_bx_cl: &'static str = rtm_cmd.clone().leak();
         let rtm_cmd: String = format!("sudo cyber-toolkit {:?}", configs.borrow().role);
-        // let rtm_cmd_rc: Rc<&'static str> = Rc::new(rtm_cmd_bx_cl);
         let btn_rtm =
             gobjects::create_btn(300, 70, "<span size='large'><b>Set Your Role</b></span>");
         btn_rtm.connect_clicked(clone!(@strong cmd_on_click_owned=>move |btn|{
@@ -222,15 +216,9 @@ pub fn draw(
             gobjects::btn_n_ttp_label("Upgrade Athena", Some("Upgrade Athena"), 300, 0);
 
         // Connect to "clicked" signal of `button`
-        btn_upgrade.connect_clicked(clone!(@strong btn_dis_send,@strong toast =>move |btn| {
-            btn.set_sensitive(false);
-            btn.set_widget_name("Upgdbtn");
-            let btn_id= btn.widget_name().to_string();
-            runtime().spawn(clone!(@strong btn_dis_send ,@strong toast_sen => async move {
-                let res = start_cmd("shell-rocket", &["sudo nix-channel --update; sudo nixos-rebuild switch"] ).await;
-                process_click(res,toast_sen ,btn_dis_send , btn_id).await;
-            }));
-        }));
+        btn_upgrade.connect_clicked(clone!(@strong cmd_on_click =>move |btn|
+            cmd_on_click(btn, "upgrade", "shell-rocket", &["sudo nix-channel --update; sudo nixos-rebuild switch"]);
+        ));
 
         let btn_hacking_var = gobjects::btn_n_ttp_label(
             "Hacking Variables",
@@ -246,18 +234,25 @@ pub fn draw(
     } else {
         let btn_gparted =
             gobjects::create_btn(300, 70, "<span size='large'><b>Run GParted</b></span>");
+        btn_gparted.connect_clicked(clone!(@strong cmd_on_click =>move |btn|
+        cmd_on_click(btn, "gparted", "gparted", &[]);
+        ));
         let btn_non_linstall = gobjects::create_btn(
             300,
             70,
             "<span size='large'><b>Installation (Online)</b></span>",
         );
         btn_non_linstall.set_halign(Align::Center);
+
+        btn_non_linstall.connect_clicked(clone!(@strong cmd_on_click =>move |btn|
+        cmd_on_click(btn, "non_linstall", "/usr/bin/aegis-gui", &[]);
+        ));
+
         hbox_vec[3].append(&btn_gparted);
         hbox_vec[2].append(&btn_non_linstall);
     }
 
     hbox_vec[3].append(&btn_channels);
-    // let configs = Rc::clone(&configs);
     let auto_start_checkbox = gtk::CheckButton::with_label("Autostart");
     auto_start_checkbox.set_active(configs.borrow().autostart);
     auto_start_checkbox.connect_toggled(clone!(@strong configs  =>move |check_btn| {
