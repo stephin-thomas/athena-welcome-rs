@@ -14,7 +14,6 @@ use gtk::{Box, Orientation};
 use std::cell::RefCell;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
-use tokio::sync::futures;
 pub fn draw(
     configs: Rc<RefCell<Config>>,
     window: Rc<ApplicationWindow>,
@@ -48,7 +47,7 @@ pub fn draw(
             println!("Shell started for {} {:?}",cmd,args);
             runtime().spawn(clone!(@strong toast_sen, @strong btn_dis_send =>async move {
             if args[0].as_str()=="sudo cyber-toolkit none"{
-                println!("Role of none selected try again");
+                println!("No role selected");
             toast_sen.send("Role of none selected try again".to_owned()).await.expect("error opening channels");
         }
                 let response = start_cmd(cmd, args.as_slice() ).await;
@@ -285,25 +284,21 @@ pub fn draw(
             tokio::select! {
                 res = t1 => {
             if let Ok(widget_name) =res{
-
-
-                            
-
+                if !crate::utils::internet_connected().await{
+                toast.add_toast(adw::Toast::new("no internet connection"));
+                };
                 if let Some(btn) = get_widget_by_name(&hbox_vec, widget_name.as_str()) {
                     println!("setting button sensitive {}",widget_name.as_str());
                     btn.set_sensitive(true);
                 };
             }},
                 res = t2 => {
-
             if let Ok(msg) = res{
                 toast.add_toast(adw::Toast::new(msg.as_str()));
             }
-                    
                 },
             }
         }
     });
-
     Ok(vbox)
 }

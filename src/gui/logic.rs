@@ -1,7 +1,6 @@
 use adw::prelude::*;
 use async_channel::Sender;
 use std::process::Output;
-use tokio::time::{sleep, Duration};
 use whoami;
 
 pub(crate) fn is_live_user() -> bool {
@@ -69,7 +68,7 @@ pub(crate) async fn process_click(
             .expect("Error opening channel");
     }
     //Remove the following line important. Only for testing
-    sleep(Duration::from_millis(3000)).await;
+    // sleep(Duration::from_millis(3000)).await;
     btn_dis_send
         .send(btn_id)
         .await

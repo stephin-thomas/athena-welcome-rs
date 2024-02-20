@@ -2,10 +2,13 @@ use std::ffi::OsStr;
 
 use tokio::process::Command;
 
-async fn check_internet() -> bool {
-    match reqwest::get("https://www.bing.com").await {
+pub async fn internet_connected() -> bool {
+    match isahc::get_async("https://www.bing.com").await {
         Ok(_) => true,
-        Err(_) => false,
+        Err(err) => {
+            println!("Error occured while checking internet {:?}", err);
+            false
+        }
     }
 }
 
