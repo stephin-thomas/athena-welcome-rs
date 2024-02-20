@@ -1,9 +1,9 @@
 use super::gobjects;
 use super::logic::{get_startup_text, get_widget_by_name, is_live_user, process_click};
-use crate::runtime;
 use crate::settings;
 use crate::settings::Config;
 use crate::utils::start_cmd;
+use crate::{runtime, utils};
 use adw::glib::clone;
 use adw::prelude::*;
 use adw::ApplicationWindow;
@@ -14,6 +14,7 @@ use gtk::{Box, Orientation};
 use std::cell::RefCell;
 use std::rc::Rc;
 use strum::IntoEnumIterator;
+use tokio::sync::futures;
 pub fn draw(
     configs: Rc<RefCell<Config>>,
     window: Rc<ApplicationWindow>,
@@ -45,10 +46,11 @@ pub fn draw(
             btn.set_widget_name(widget_name);
             let btn_id= btn.widget_name().to_string();
             println!("Shell started for {} {:?}",cmd,args);
-            if args[0]=="none"{
-        }
             runtime().spawn(clone!(@strong toast_sen, @strong btn_dis_send =>async move {
+            if args[0].as_str()=="sudo cyber-toolkit none"{
+                println!("Role of none selected try again");
             toast_sen.send("Role of none selected try again".to_owned()).await.expect("error opening channels");
+        }
                 let response = start_cmd(cmd, args.as_slice() ).await;
                 process_click(response,toast_sen ,btn_dis_send , btn_id).await;
                             }));});
@@ -204,7 +206,7 @@ pub fn draw(
         hbox_vec[2].set_valign(gtk::Align::Center);
         hbox_vec[2].set_margin_top(10);
         hbox_vec[2].append(&btn_tool);
-        let rtm_cmd: String = format!("sudo cyber-toolkit {:?}", configs.borrow().role.id());
+        let rtm_cmd: String = format!("sudo cyber-toolkit {}", configs.borrow().role.id());
         let btn_rtm =
             gobjects::create_btn(300, 70, "<span size='large'><b>Set Your Role</b></span>");
         btn_rtm.connect_clicked(clone!(@strong cmd_on_click_owned=>move |btn|{
@@ -278,13 +280,27 @@ pub fn draw(
     // The main loop executes the asynchronous block
     glib::spawn_future_local(async move {
         loop {
-            if let Ok(widget_name) = btn_dis_receiver.recv().await {
+            let t1 = btn_dis_receiver.recv();
+            let t2 = toast_rec.recv();
+            tokio::select! {
+                res = t1 => {
+            if let Ok(widget_name) =res{
+
+
+                            
+
                 if let Some(btn) = get_widget_by_name(&hbox_vec, widget_name.as_str()) {
+                    println!("setting button sensitive {}",widget_name.as_str());
                     btn.set_sensitive(true);
                 };
-            }
-            if let Ok(msg) = toast_rec.recv().await {
+            }},
+                res = t2 => {
+
+            if let Ok(msg) = res{
                 toast.add_toast(adw::Toast::new(msg.as_str()));
+            }
+                    
+                },
             }
         }
     });
