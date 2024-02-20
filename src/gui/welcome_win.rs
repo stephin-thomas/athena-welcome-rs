@@ -1,9 +1,9 @@
 use super::gobjects;
 use super::logic::{get_startup_text, get_widget_by_name, is_live_user, process_click};
+use crate::runtime;
 use crate::settings;
 use crate::settings::Config;
-use crate::utils::start_cmd;
-use crate::{runtime, utils};
+use crate::utils::{internet_connected, start_cmd};
 use adw::glib::clone;
 use adw::prelude::*;
 use adw::ApplicationWindow;
@@ -48,7 +48,7 @@ pub fn draw(
             runtime().spawn(clone!(@strong toast_sen, @strong btn_dis_send =>async move {
             if args[0].as_str()=="sudo cyber-toolkit none"{
                 println!("No role selected");
-            toast_sen.send("Role of none selected try again".to_owned()).await.expect("error opening channels");
+            toast_sen.send("no role selected".to_owned()).await.expect("error opening channels");
         }
                 let response = start_cmd(cmd, args.as_slice() ).await;
                 process_click(response,toast_sen ,btn_dis_send , btn_id).await;
@@ -284,7 +284,7 @@ pub fn draw(
             tokio::select! {
                 res = t1 => {
             if let Ok(widget_name) =res{
-                if !crate::utils::internet_connected().await{
+                if !internet_connected().await{
                 toast.add_toast(adw::Toast::new("no internet connection"));
                 };
                 if let Some(btn) = get_widget_by_name(&hbox_vec, widget_name.as_str()) {
