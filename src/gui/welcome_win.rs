@@ -45,7 +45,8 @@ pub fn draw(
             btn.set_widget_name(widget_name);
             let btn_id= btn.widget_name().to_string();
             println!("Shell started for {} {:?}",cmd,args);
-            runtime().spawn(clone!(@strong toast_sen, @strong btn_dis_send =>async move {
+            runtime().spawn(clone!(@strong toast_sen, @strong btn_dis_send=>async move {
+
             if args[0].as_str()=="sudo cyber-toolkit none"{
                 println!("No role selected");
             toast_sen.send("no role selected".to_owned()).await.expect("error opening channels");
@@ -205,12 +206,14 @@ pub fn draw(
         hbox_vec[2].set_valign(gtk::Align::Center);
         hbox_vec[2].set_margin_top(10);
         hbox_vec[2].append(&btn_tool);
-        let rtm_cmd: String = format!("sudo cyber-toolkit {}", configs.borrow().role.id());
         let btn_rtm =
             gobjects::create_btn(300, 70, "<span size='large'><b>Set Your Role</b></span>");
-        btn_rtm.connect_clicked(clone!(@strong cmd_on_click_owned=>move |btn|{
-            cmd_on_click_owned(btn, "btn_rtm", "shell-rocket", vec![rtm_cmd.clone()]);}
-        ));
+        btn_rtm.connect_clicked(
+            clone!(@strong cmd_on_click_owned,@strong configs=>move |btn|{
+            let rtm_cmd: String = format!("sudo cyber-toolkit {}", configs.borrow().role.id());
+                    cmd_on_click_owned(btn, "btn_rtm", "shell-rocket", vec![rtm_cmd.clone()]);}
+                ),
+        );
 
         hbox_vec[3].append(&btn_rtm);
         let btn_role_tools = gobjects::btn_n_ttp_label(
