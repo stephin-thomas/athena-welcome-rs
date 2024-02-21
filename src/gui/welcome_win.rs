@@ -4,6 +4,7 @@ use crate::runtime;
 use crate::settings;
 use crate::settings::Config;
 use crate::utils::{internet_connected, start_cmd};
+use crate::ASSETS;
 use adw::glib::clone;
 use adw::prelude::*;
 use adw::ApplicationWindow;
@@ -19,6 +20,7 @@ pub fn draw(
     window: Rc<ApplicationWindow>,
     toast: Rc<adw::ToastOverlay>,
 ) -> Result<Box> {
+    println!("Assets path {:?}", ASSETS.as_path());
     //Channel to send signal to make a button sensitive after executing a command.
     let (btn_dis_send, btn_dis_receiver) = async_channel::bounded(1);
     //Messages send through will be shown as toasts.
@@ -31,7 +33,8 @@ pub fn draw(
             }));
         };
     });
-    let cmd_on_click = clone!(@strong toast,@strong toast_sen, @strong btn_dis_send =>move |btn:&gtk::Button,widget_name:&str,cmd:&'static str,args:&'static [&'static str]| {
+    let cmd_on_click = clone!(@strong toast,@strong toast_sen, @strong btn_dis_send =>
+        move |btn:&gtk::Button,widget_name:&str,cmd:&'static str,args:&'static [&'static str]| {
             btn.set_sensitive(false);
             btn.set_widget_name(widget_name);
             let btn_id= btn.widget_name().to_string();
@@ -40,7 +43,8 @@ pub fn draw(
                 let response = start_cmd(cmd, args ).await;
                 process_click(response,toast_sen ,btn_dis_send , btn_id).await;
                             }));});
-    let cmd_on_click_owned = clone!(@strong toast,@strong toast_sen, @strong btn_dis_send =>move |btn:&gtk::Button,widget_name:&str,cmd:&'static str, args:Vec<String>| {
+    let cmd_on_click_owned = clone!(@strong toast,@strong toast_sen, @strong btn_dis_send =>
+        move |btn:&gtk::Button,widget_name:&str,cmd:&'static str, args:Vec<String>| {
             btn.set_sensitive(false);
             btn.set_widget_name(widget_name);
             let btn_id= btn.widget_name().to_string();
@@ -75,8 +79,10 @@ pub fn draw(
     //Infobox
     let infobutton = gtk::Button::new();
     infobutton.set_has_tooltip(true);
+    let mut question_mark_icon = ASSETS.clone();
+    question_mark_icon.push("/question.png");
     let image = gtk::Image::builder()
-        .file("assets/question.png")
+        .file(question_mark_icon.to_str().unwrap())
         .pixel_size(30)
         .build();
     infobutton.set_child(Some(&image));
@@ -167,36 +173,35 @@ pub fn draw(
         // let configs_rc_cl = Rc::clone(&configs_rc);
         role_dropdown.connect_selected_notify(clone!(@strong configs =>move |signal| {
             let sign = signal.selected();
-            let role = settings::Role::iter()
-                .enumerate()
-                .find(
-                    move |(index, _)| {
-                        if *index == sign as usize {
-                            true
-                        } else {
-                            false
-                        }
-                    },
-                )
-                .unwrap();
+            let role = settings::Role::iter().enumerate()
+            .find(move
+                |(index, _)|
+                {if *index == sign as usize{
+                    true } else {
+                        false}
+                },).unwrap();
             {
                 configs.borrow_mut().role = role.1;
             }
-                configs.borrow().save().unwrap();
-        }));
+            configs.borrow().save().unwrap();
+        }
+        ));
 
+        let mut btn_htb_icon = ASSETS.clone();
+        btn_htb_icon.push("htb.png");
         let btn_htb = gobjects::gen_img_btn(
-            "assets/htb.png",
+            btn_htb_icon.to_str().unwrap(),
             "<span size='large'><b>HTB Update</b></span>",
             300,
             50,
         );
-        btn_htb.connect_clicked(clone!(@strong cmd_on_click =>move |btn|
-            cmd_on_click(btn, "htb_upd", "shell-rocket", &["htb-toolkit -u"]);
-        ));
+        btn_htb.connect_clicked(clone!(@strong cmd_on_click =>
+            move |btn|cmd_on_click(btn, "htb_upd", "shell-rocket", &["htb-toolkit -u"]);));
+        let mut btn_tool_icon = ASSETS.clone();
+        btn_tool_icon.push("tools_recipe.png");
 
         let btn_tool = gobjects::gen_img_btn(
-            "assets/tools_recipe.png",
+            btn_tool_icon.to_str().unwrap(),
             "<span size='large'><b>Tool Recipe</b></span>",
             300,
             50,
@@ -246,7 +251,7 @@ pub fn draw(
         let btn_gparted =
             gobjects::create_btn(300, 70, "<span size='large'><b>Run GParted</b></span>");
         btn_gparted.connect_clicked(clone!(@strong cmd_on_click =>move |btn|
-        cmd_on_click(btn, "gparted", "gparted", &[]);
+        cmd_on_click(btn, "btn_gparted", "gparted", &[]);
         ));
         let btn_non_linstall = gobjects::create_btn(
             300,
@@ -291,7 +296,7 @@ pub fn draw(
                 toast.add_toast(adw::Toast::new("no internet connection"));
                 };
                 if let Some(btn) = get_widget_by_name(&hbox_vec, widget_name.as_str()) {
-                    println!("setting button sensitive {}",widget_name.as_str());
+                    println!("setting '{}' button sensitive ",widget_name.as_str());
                     btn.set_sensitive(true);
                 };
             }},

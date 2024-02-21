@@ -3,7 +3,7 @@ use dirs;
 use gtk::glib;
 use gtk::prelude::*;
 use lazy_static::lazy_static;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 use tokio::runtime::Runtime;
 mod gui;
@@ -26,6 +26,7 @@ fn get_app_config_dir() -> Result<PathBuf> {
 
 lazy_static! {
     pub static ref APP_CONFIG_DIR: PathBuf = get_app_config_dir().unwrap();
+    pub static ref ASSETS: PathBuf = PathBuf::from("./assets/");
     pub static ref SETTINGS_PATH: PathBuf = APP_CONFIG_DIR.join("settings.conf");
 }
 
