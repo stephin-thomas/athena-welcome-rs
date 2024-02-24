@@ -8,6 +8,7 @@ use adw::prelude::*;
 use adw::ApplicationWindow;
 mod gobjects;
 mod logic;
+mod role_tools_win;
 pub mod welcome_win;
 
 pub(crate) fn build_ui(app: &adw::Application) {
@@ -25,7 +26,8 @@ pub(crate) fn build_ui(app: &adw::Application) {
         .icon_name(APP_NAME)
         .build();
     let window_rc = Rc::new(window);
-    let welcome_win = welcome_win::draw(configs.clone(), window_rc.clone(), toast.clone()).unwrap();
+    let welcome_win =
+        welcome_win::draw(configs.clone(), window_rc.clone(), toast.clone(), app).unwrap();
     toast.set_child(Some(&welcome_win));
     window_rc.set_content(Some(toast.as_ref()));
 

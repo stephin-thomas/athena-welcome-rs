@@ -44,6 +44,23 @@ impl Role {
             Role::WebPentester => "web",
         }
     }
+    pub fn name(&self) -> &'static str {
+        match self {
+            Role::None => "None",
+            Role::BlueTeamer => "Blue Teamer",
+            Role::BugBountyHunter => "Bug Bounty Hunter",
+            Role::CrackerSpecialist => "Cracker Specialist",
+            Role::DoSTester => "Dos Tester",
+            Role::EnthusiastStudent => "Enthusiast Student",
+            Role::ForensicAnalyst => "Forensic",
+            Role::MalwareAnalyst => "Malware Analyst",
+            Role::MobileAnalyst => "Mobile Analyst",
+            Role::NetworkAnalyst => "Network Analyst",
+            Role::OSINTSpecialist => "OSINT Specialist",
+            Role::RedTeamer => "Red Teamer",
+            Role::WebPentester => "Web Pentester",
+        }
+    }
 }
 impl fmt::Display for Role {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

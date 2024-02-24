@@ -1,5 +1,6 @@
 use super::gobjects;
 use super::logic::{get_startup_text, get_widget_by_name, is_live_user, process_click};
+use crate::gui::role_tools_win;
 use crate::runtime;
 use crate::settings;
 use crate::settings::Config;
@@ -19,6 +20,7 @@ pub fn draw(
     configs: Rc<RefCell<Config>>,
     window: Rc<ApplicationWindow>,
     toast: Rc<adw::ToastOverlay>,
+    app: &adw::Application,
 ) -> Result<Box> {
     println!("Assets path {:?}", ASSETS.as_path());
     //Channel to send signal to make a button sensitive after executing a command.
@@ -154,7 +156,6 @@ pub fn draw(
     //label warning
     let label_warning = gobjects::create_generic_label(gtk::Justification::Center);
     if !is_live_user() {
-        //Drop box
         let roles_string: Vec<String> = settings::Role::iter()
             .map(|role| role.to_string())
             .collect();
@@ -226,6 +227,9 @@ pub fn draw(
             Some("Show all the tools for each role"),
             300,
             0,
+        );
+        btn_role_tools.connect_clicked(
+            clone!(@strong app,@strong configs=>move |_| role_tools_win::create(&app, configs.clone())),
         );
 
         let btn_upgrade =

@@ -1,5 +1,4 @@
-use std::ffi::OsStr;
-
+use std::{ffi::OsStr, fs::File, path::Path};
 use tokio::process::Command;
 
 pub async fn internet_connected() -> bool {
@@ -18,10 +17,6 @@ where
     S: AsRef<OsStr>,
 {
     let cmd_owned = cmd.to_owned();
-    // let args_owned = args
-    //     .into_iter()
-    //     .map(|&val| val.to_owned())
-    //     .collect::<Vec<String>>();
 
     let output = Command::new(&cmd_owned).args(args).output().await;
     match output {
@@ -45,4 +40,24 @@ where
             None
         }
     }
+}
+
+use csv::ReaderBuilder;
+#[derive(Debug, serde::Deserialize)]
+pub struct Record {
+    pub role: String,
+    pub tool: String,
+    pub desc: String,
+}
+pub fn read_csv_data(path: impl AsRef<Path>) -> Vec<Record> {
+    let mut csv_reader: csv::Reader<File> = ReaderBuilder::new()
+        .delimiter(b';')
+        .from_path(path)
+        .expect("Error reading csv file");
+    let rec_iter = csv_reader.deserialize();
+    let records: Vec<Record> = rec_iter
+        .filter(|rec| rec.is_ok())
+        .map(|rec| rec.unwrap())
+        .collect();
+    return records;
 }
