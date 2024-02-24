@@ -49,6 +49,7 @@ pub(crate) fn create(app: &adw::Application, configs: Rc<RefCell<Config>>) {
 }
 
 pub(crate) fn draw(role: String) -> Box {
+    println!("Filter {}", role);
     let store = gio::ListStore::new::<BoxedAnyObject>();
 
     let mut csv_path = ASSETS.clone();
@@ -79,7 +80,8 @@ pub(crate) fn draw(role: String) -> Box {
         child.set_width_request(150_i32);
         let entry = item.item().and_downcast::<BoxedAnyObject>().unwrap();
         let r: Ref<Record> = entry.borrow();
-        if r.role == role_col1 {
+        println!("{} == {role_col1}", r.role);
+        if r.role.trim() == role_col1.trim() {
             let ent = Entry {
                 name: r.role.clone(),
             };
@@ -168,9 +170,11 @@ pub(crate) fn draw(role: String) -> Box {
     filter_lbl.set_label("Filter");
     hbox.append(&filter_lbl);
     hbox.append(&role_dropdown);
+    scrolled_window.set_vexpand(true);
+    scrolled_window.set_min_content_height(250);
     let vbox = Box::builder()
         .orientation(Orientation::Vertical)
-        .homogeneous(true)
+        // .homogeneous(true)
         .build();
     vbox.append(&scrolled_window);
     vbox.append(&hbox);
