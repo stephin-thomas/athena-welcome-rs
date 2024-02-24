@@ -76,12 +76,12 @@ pub(crate) fn draw(role: String) -> Box {
     let role_col1 = role.clone();
     col1factory.connect_bind(move |_factory, item| {
         let item = item.downcast_ref::<gtk::ListItem>().unwrap();
-        let child = item.child().and_downcast::<GridCell>().unwrap();
-        child.set_width_request(150_i32);
         let entry = item.item().and_downcast::<BoxedAnyObject>().unwrap();
         let r: Ref<Record> = entry.borrow();
-        println!("{} == {role_col1}", r.role);
         if r.role.trim() == role_col1.trim() {
+            let child = item.child().and_downcast::<GridCell>().unwrap();
+            child.set_width_request(150_i32);
+            println!("Found {} == {role_col1}", r.role);
             let ent = Entry {
                 name: r.role.clone(),
             };
@@ -97,11 +97,11 @@ pub(crate) fn draw(role: String) -> Box {
     let role_col2 = role.clone();
     col2factory.connect_bind(move |_factory, item| {
         let item = item.downcast_ref::<gtk::ListItem>().unwrap();
-        let child = item.child().and_downcast::<GridCell>().unwrap();
-        child.set_width_request(150_i32);
         let entry = item.item().and_downcast::<BoxedAnyObject>().unwrap();
         let r: Ref<Record> = entry.borrow();
         if r.role == role_col2 {
+            let child = item.child().and_downcast::<GridCell>().unwrap();
+            child.set_width_request(150_i32);
             let ent = Entry {
                 name: r.tool.clone(),
             };
@@ -116,11 +116,11 @@ pub(crate) fn draw(role: String) -> Box {
 
     col3factory.connect_bind(move |_factory, item| {
         let item = item.downcast_ref::<gtk::ListItem>().unwrap();
-        let child = item.child().and_downcast::<GridCell>().unwrap();
-        child.set_width_request(800_i32);
         let entry = item.item().and_downcast::<BoxedAnyObject>().unwrap();
         let r: Ref<Record> = entry.borrow();
         if r.role == role {
+            let child = item.child().and_downcast::<GridCell>().unwrap();
+            child.set_width_request(800_i32);
             let ent = Entry {
                 name: r.desc.clone(),
             };
