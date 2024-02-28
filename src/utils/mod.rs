@@ -43,7 +43,7 @@ where
 }
 
 use csv::ReaderBuilder;
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize, Clone)]
 pub struct Record {
     pub role: String,
     pub tool: String,
