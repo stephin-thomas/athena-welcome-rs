@@ -8,7 +8,7 @@ use adw::prelude::*;
 use adw::ApplicationWindow;
 mod gobjects;
 mod logic;
-mod role_tools_win;
+mod table_win;
 pub mod welcome_win;
 
 pub(crate) fn build_ui(app: &adw::Application) {

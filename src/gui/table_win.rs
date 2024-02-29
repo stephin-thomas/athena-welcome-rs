@@ -1,38 +1,54 @@
 use gtk::{gio, glib::BoxedAnyObject, prelude::*, Orientation};
 use gtk::{Box, SingleSelection};
 
-use strum::IntoEnumIterator;
+use serde::de::DeserializeOwned;
 
 use std::cell::Ref;
+use std::path::Path;
 
 use crate::gui::gobjects;
-use crate::{
-    settings,
-    utils::{read_csv_data, Record},
-    ASSETS,
-};
+use crate::utils::read_csv_data;
+use crate::utils::AsArray;
+use crate::ASSETS;
 
-use crate::settings::Config;
 use adw::prelude::*;
 use adw::ApplicationWindow;
-use std::cell::RefCell;
 use std::rc::Rc;
 
 use super::APP_NAME;
 use adw::gio::ActionEntry;
 
-pub(crate) fn create(app: &adw::Application, configs: Rc<RefCell<Config>>) {
+pub(crate) fn create<S, T>(
+    app: &adw::Application,
+    title: &str,
+    header: [&'static str; 3],
+    filter_index: usize,
+    filter_dropdown: Vec<String>,
+    csv_path: S,
+    col_width: Option<[i32; 3]>,
+) where
+    S: AsRef<Path>,
+    T: AsArray,
+    T: DeserializeOwned,
+    T: Clone,
+    T: 'static,
+    //for debugging purpose only
+    T: std::fmt::Debug,
+{
     // Create a window and set the title
     let window = ApplicationWindow::builder()
         .application(app)
-        .title("Athena Roles")
+        .title(title)
         .default_height(250)
         .default_width(920)
         .icon_name(APP_NAME)
         .build();
     // let window = Rc::new(window);
-    let role = &configs.borrow().role;
-    let roles_win = draw(role.name().to_owned());
+    let mut csv_abs_path = ASSETS.clone();
+    csv_abs_path.push(csv_path);
+    let csv_data: Rc<Vec<T>> = Rc::new(read_csv_data(csv_abs_path));
+    println!("Read csv file");
+    let roles_win = draw(csv_data, header, filter_index, filter_dropdown, col_width);
     window.set_content(Some(&roles_win));
 
     let action_close = ActionEntry::builder("close")
@@ -45,95 +61,120 @@ pub(crate) fn create(app: &adw::Application, configs: Rc<RefCell<Config>>) {
     window.present();
 }
 
-pub(crate) fn draw(role: String) -> Box {
-    println!("Filter {}", role);
-    let mut csv_path = ASSETS.clone();
-    csv_path.push("roles.csv");
-    let role_csv_data = Rc::new(read_csv_data(csv_path));
-    println!("Read csv file");
+pub(crate) fn draw<T>(
+    csv_data: Rc<Vec<T>>,
+    header: [&'static str; 3],
+    filter_index: usize,
+    filter_dropdown: Vec<String>,
+    col_width: Option<[i32; 3]>,
+) -> Box
+where
+    T: AsArray,
+    T: Clone,
+    T: 'static,
+{
     // Create columns and add them to the table
-    let store = filter_list(Rc::clone(&role_csv_data).as_ref(), "None".to_owned());
+    let store = filter_list(Rc::clone(&csv_data), "None".to_owned(), filter_index);
 
     let sel = gtk::SingleSelection::new(Some(store));
     let columnview = Rc::new(gtk::ColumnView::new(Some(sel)));
-
     let col1factory = gtk::SignalListItemFactory::new();
     let col2factory = gtk::SignalListItemFactory::new();
     let col3factory = gtk::SignalListItemFactory::new();
     col1factory.connect_setup(move |_factory, item| {
         let item = item.downcast_ref::<gtk::ListItem>().unwrap();
-        let row = gtk::Label::new(None);
+        // let row = gtk::Label::new(None);
+        let row = gtk::Label::builder()
+            .justify(gtk::Justification::Left)
+            .wrap(true)
+            .xalign(0.0)
+            // .width_request(col_width)
+            .build();
         item.set_child(Some(&row));
     });
     col1factory.connect_bind(move |_factory, item| {
         let item = item.downcast_ref::<gtk::ListItem>().unwrap();
         let entry = item.item().and_downcast::<BoxedAnyObject>().unwrap();
-        let r: Ref<Record> = entry.borrow();
+        let r: Ref<T> = entry.borrow();
         // if r.role == role1 {
         let child = item.child().and_downcast::<gtk::Label>().unwrap();
         // child.set_width_request(200_i32);
-        child.set_text(r.role.as_str());
+        child.set_text(r.as_array()[0].as_str());
         child.set_justify(gtk::Justification::Left);
         // }
     });
     // col1factory.connect("filter",true ,|role|{} )
     col2factory.connect_setup(move |_factory, item| {
         let item = item.downcast_ref::<gtk::ListItem>().unwrap();
-        let row = gtk::Label::new(None);
+        let row = gtk::Label::builder()
+            .justify(gtk::Justification::Left)
+            .wrap(true)
+            .xalign(0.0)
+            // .width_request(col_width)
+            .build();
+
         item.set_child(Some(&row));
     });
     // col1factory.connect("filter",true ,move |role|{store2.borrow_mut().remove_all(); return None} )
     col2factory.connect_bind(move |_factory, item| {
         let item = item.downcast_ref::<gtk::ListItem>().unwrap();
         let entry = item.item().and_downcast::<BoxedAnyObject>().unwrap();
-        let r: Ref<Record> = entry.borrow();
+        let r: Ref<T> = entry.borrow();
         // if r.role == role2 {
         let child = item.child().and_downcast::<gtk::Label>().unwrap();
         // child.set_width_request(200_i32);
-        child.set_text(r.tool.as_str());
+        child.set_text(r.as_array()[1].as_str());
         child.set_justify(gtk::Justification::Left);
         // }
     });
     col3factory.connect_setup(move |_factory, item| {
         let item = item.downcast_ref::<gtk::ListItem>().unwrap();
-        let row = gtk::Label::new(None);
+        let row = gtk::Label::builder()
+            .justify(gtk::Justification::Left)
+            .wrap(true)
+            .xalign(0.0)
+            // .width_request(col_width)
+            .build();
         item.set_child(Some(&row));
     });
 
     col3factory.connect_bind(move |_factory, item| {
         let item = item.downcast_ref::<gtk::ListItem>().unwrap();
         let entry = item.item().and_downcast::<BoxedAnyObject>().unwrap();
-        let r: Ref<Record> = entry.borrow();
+        let r: Ref<T> = entry.borrow();
         // if r.role == role3 {
         let child = item.child().and_downcast::<gtk::Label>().unwrap();
         // child.set_width_request(200_i32);
         child.set_justify(gtk::Justification::Left);
-        child.set_text(r.desc.as_str());
+        child.set_text(r.as_array()[2].as_str());
         // }
     });
-    let role_col = gtk::ColumnViewColumn::new(Some("Role"), Some(col1factory));
-    let tool_col = gtk::ColumnViewColumn::new(Some("Tool"), Some(col2factory));
-    let desc_col = gtk::ColumnViewColumn::new(Some("Description"), Some(col3factory));
-    columnview.append_column(&role_col);
-    columnview.append_column(&tool_col);
-    columnview.append_column(&desc_col);
+    let col1 = gtk::ColumnViewColumn::new(Some(header[0]), Some(col1factory));
+    let col2 = gtk::ColumnViewColumn::new(Some(header[1]), Some(col2factory));
+    let col3 = gtk::ColumnViewColumn::new(Some(header[2]), Some(col3factory));
+    if let Some(col_w) = col_width {
+        col1.set_fixed_width(col_w[0]);
+        col2.set_fixed_width(col_w[1]);
+        col3.set_fixed_width(col_w[2]);
+    }
+    columnview.append_column(&col1);
+    columnview.append_column(&col2);
+    columnview.append_column(&col3);
     let column_view_rc = Rc::clone(&columnview);
     let scrolled_window = gtk::ScrolledWindow::builder()
         // .hscrollbar_policy(gtk::PolicyType::Never) // Disable horizontal scrolling
         .build();
 
     scrolled_window.set_child(Some(columnview.as_ref()));
-
-    let roles_string: Vec<String> = settings::Role::iter()
-        .map(|role| role.to_string())
-        .collect();
-    let roles: Vec<&str> = roles_string.iter().map(String::as_ref).collect();
-    let role_dropdown = gtk::DropDown::from_strings(roles.as_slice());
+    let drop_down_str: Vec<&str> = filter_dropdown.iter().map(String::as_ref).collect();
+    let role_dropdown = gtk::DropDown::from_strings(drop_down_str.as_slice());
     role_dropdown.set_size_request(200, 1);
     role_dropdown.set_halign(gtk::Align::End);
+    let filter_dropdown_1 = filter_dropdown.clone();
     role_dropdown.connect_selected_notify(move |signal| {
         let sign = signal.selected();
-        let role = settings::Role::iter()
+        let role = filter_dropdown_1
+            .iter()
             .enumerate()
             .find(
                 move |(index, _)| {
@@ -147,7 +188,7 @@ pub(crate) fn draw(role: String) -> Box {
             .unwrap();
         let model = column_view_rc.model().unwrap();
         let single_select_model: SingleSelection = model.downcast().unwrap();
-        let store = filter_list(Rc::clone(&role_csv_data).as_ref(), role.1.name().to_owned());
+        let store = filter_list(Rc::clone(&csv_data), (*role.1).to_owned(), filter_index);
         single_select_model.set_model(Some(&store));
         column_view_rc.set_model(Some(&single_select_model));
     });
@@ -172,26 +213,23 @@ pub(crate) fn draw(role: String) -> Box {
     return vbox;
 }
 
-fn filter_list(role_csv_data: &Vec<Record>, role: String) -> gio::ListStore {
+fn filter_list<T>(
+    role_csv_data: Rc<Vec<T>>,
+    filter_str: String,
+    filter_index: usize,
+) -> gio::ListStore
+where
+    T: AsArray,
+    T: Clone,
+    T: 'static,
+{
     let store = gio::ListStore::new::<BoxedAnyObject>();
-    for record in role_csv_data {
+    for record in role_csv_data.as_ref() {
         // println!("Role {},csv_data {}", role, record.role);
-        if record.role == role || "None" == role {
+        if record.as_array()[filter_index] == filter_str || "None" == filter_str {
             store.append(&BoxedAnyObject::new(record.clone()))
         }
     }
     store
 }
-
-// fn filter_store(store: &gio::ListStore, role: String) {
-//     store.retain(|item| {
-//         let item = item.downcast_ref::<BoxedAnyObject>().unwrap();
-//         // let entry = item.item().and_downcast::<BoxedAnyObject>().unwrap();
-//         let r: Ref<Record> = item.borrow();
-//         if r.role == role || role == "None" {
-//             return true;
-//         } else {
-//             return false;
-//         }
-//     });
-// }
+//close this window when the main window closes

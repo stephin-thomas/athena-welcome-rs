@@ -3,7 +3,7 @@ use dirs;
 use gtk::glib;
 use gtk::prelude::*;
 use lazy_static::lazy_static;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::OnceLock;
 use tokio::runtime::Runtime;
 mod gui;

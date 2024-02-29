@@ -1,10 +1,9 @@
 use super::gobjects;
 use super::logic::{get_startup_text, get_widget_by_name, is_live_user, process_click};
-use crate::gui::role_tools_win;
 use crate::runtime;
 use crate::settings;
 use crate::settings::Config;
-use crate::utils::{internet_connected, start_cmd};
+use crate::utils::{internet_connected, start_cmd, HackingVariables, Record};
 use crate::ASSETS;
 use adw::glib::clone;
 use adw::prelude::*;
@@ -229,8 +228,12 @@ pub fn draw(
             0,
         );
         btn_role_tools.connect_clicked(
-            clone!(@strong app,@strong configs=>move |_| role_tools_win::create(&app, configs.clone())),
-        );
+            clone!(@strong app=>move |_| {
+                let roles: Vec<String> = settings::Role::iter().map(|role| role.name().to_owned()).collect();
+                // let roles: Vec<&str> = roles_string.iter().map(String::as_ref).collect();            
+                super::table_win::create::<&str,Record>(&app,"Role Tools",["Role","Tool","Description"] ,0 , roles,"roles.csv" ,None);
+                // super::role_tools_win::create(&app, configs.clone())),
+                        }));
 
         let btn_upgrade =
             gobjects::btn_n_ttp_label("Upgrade Athena", Some("Upgrade Athena"), 300, 0);
@@ -246,6 +249,11 @@ pub fn draw(
             300,
             0,
         );
+        btn_hacking_var.connect_clicked(
+            clone!(@strong app=>move |_| {
+                let categories: Vec<String>= vec!["None".to_owned(),"Generic".to_owned(),"Post Exploitation".to_owned(),"Web Analysis".to_owned(),"Password Cracking".to_owned()];
+                super::table_win::create::<&str,HackingVariables>(&app,"Hacking Variables",["Variable","Path","Category"] ,2 , categories,"hacking_variables.csv",Some([200,500,300]) );
+                        }));
 
         hbox_vec[4].append(&btn_role_tools);
         hbox_vec[4].set_spacing(10);
