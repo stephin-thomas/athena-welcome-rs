@@ -27,7 +27,7 @@ pub(crate) fn build_ui(app: &adw::Application) {
         .build();
     let window_rc = Rc::new(window);
     let welcome_win =
-        welcome_win::draw(configs.clone(), window_rc.clone(), toast.clone(), app).unwrap();
+        welcome_win::draw(configs.clone(), Rc::clone(&window_rc), toast.clone(), app).unwrap();
     toast.set_child(Some(&welcome_win));
     window_rc.set_content(Some(toast.as_ref()));
 

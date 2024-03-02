@@ -228,10 +228,10 @@ pub fn draw(
             0,
         );
         btn_role_tools.connect_clicked(
-            clone!(@strong app=>move |_| {
+            clone!(@strong app,@strong window=>move |_| {
                 let roles: Vec<String> = settings::Role::iter().map(|role| role.name().to_owned()).collect();
                 // let roles: Vec<&str> = roles_string.iter().map(String::as_ref).collect();            
-                super::table_win::create::<&str,Record>(&app,"Role Tools",["Role","Tool","Description"] ,0 , roles,"roles.csv" ,None);
+                super::table_win::create::<&str,Record>(&app,"Role Tools",["Role","Tool","Description"] ,0 , roles,"roles.csv" ,None, Rc::clone(&window));
                 // super::role_tools_win::create(&app, configs.clone())),
                         }));
 
@@ -250,9 +250,9 @@ pub fn draw(
             0,
         );
         btn_hacking_var.connect_clicked(
-            clone!(@strong app=>move |_| {
+            clone!(@strong app,@strong window=>move |_| {
                 let categories: Vec<String>= vec!["None".to_owned(),"Generic".to_owned(),"Post Exploitation".to_owned(),"Web Analysis".to_owned(),"Password Cracking".to_owned()];
-                super::table_win::create::<&str,HackingVariables>(&app,"Hacking Variables",["Variable","Path","Category"] ,2 , categories,"hacking_variables.csv",Some([200,500,300]) );
+                super::table_win::create::<&str,HackingVariables>(&app,"Hacking Variables",["Variable","Path","Category"] ,2 , categories,"hacking_variables.csv",Some([200,500,300]), Rc::clone(&window));
                         }));
 
         hbox_vec[4].append(&btn_role_tools);

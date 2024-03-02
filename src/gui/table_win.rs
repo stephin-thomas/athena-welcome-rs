@@ -26,6 +26,7 @@ pub(crate) fn create<S, T>(
     filter_dropdown: Vec<String>,
     csv_path: S,
     col_width: Option<[i32; 3]>,
+    parent_win: Rc<ApplicationWindow>,
 ) where
     S: AsRef<Path>,
     T: AsArray,
@@ -43,6 +44,7 @@ pub(crate) fn create<S, T>(
         .default_width(920)
         .icon_name(APP_NAME)
         .build();
+    window.set_transient_for(Some(parent_win.as_ref()));
     // let window = Rc::new(window);
     let mut csv_abs_path = ASSETS.clone();
     csv_abs_path.push(csv_path);
@@ -57,6 +59,8 @@ pub(crate) fn create<S, T>(
         })
         .build();
     window.add_action_entries([action_close]);
+    window.set_parent(parent_win.as_ref());
+    window.set_destroy_with_parent(true);
     // Present window
     window.present();
 }
