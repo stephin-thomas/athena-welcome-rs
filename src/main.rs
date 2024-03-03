@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+mod csv_data;
 use dirs;
 use gtk::glib;
 use gtk::prelude::*;

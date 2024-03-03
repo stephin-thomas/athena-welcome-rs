@@ -24,7 +24,7 @@ pub(crate) fn create<S, T>(
     header: [&'static str; 3],
     filter_index: usize,
     filter_dropdown: Vec<String>,
-    csv_path: S,
+    csv_data: Rc<Vec<T>>,
     col_width: Option<[i32; 3]>,
     parent_win: Rc<ApplicationWindow>,
 ) where
@@ -46,10 +46,6 @@ pub(crate) fn create<S, T>(
         .build();
     window.set_transient_for(Some(parent_win.as_ref()));
     // let window = Rc::new(window);
-    let mut csv_abs_path = ASSETS.clone();
-    csv_abs_path.push(csv_path);
-    let csv_data: Rc<Vec<T>> = Rc::new(read_csv_data(csv_abs_path));
-    println!("Read csv file");
     let roles_win = draw(csv_data, header, filter_index, filter_dropdown, col_width);
     window.set_content(Some(&roles_win));
 
