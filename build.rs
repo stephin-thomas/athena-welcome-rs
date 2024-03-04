@@ -1,13 +1,10 @@
 use csv::ReaderBuilder;
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote, ToTokens, TokenStreamExt};
+use quote::{quote, ToTokens};
 use serde::de::DeserializeOwned;
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-// pub trait AsArray {
-//     fn as_array(&self) -> Vec<String>;
-// }
 #[derive(Debug, serde::Deserialize, Clone)]
 pub struct Record {
     pub role: String,
@@ -22,11 +19,6 @@ pub struct HackingVariables {
     pub category: String,
 }
 
-// impl AsArray for Record {
-//     fn as_array(&self) -> Vec<String> {
-//         vec![self.role.clone(), self.tool.clone(), self.desc.clone()]
-//     }
-// }
 pub fn read_csv_data<T>(path: impl AsRef<Path>) -> Vec<T>
 where
     T: DeserializeOwned,

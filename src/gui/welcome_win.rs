@@ -256,11 +256,8 @@ pub fn draw(
         btn_hacking_var.connect_clicked(
             clone!(@strong app,@strong window=>move |_| {
                 let categories: Vec<String>= vec!["None".to_owned(),"Generic".to_owned(),"Post Exploitation".to_owned(),"Web Analysis".to_owned(),"Password Cracking".to_owned()];
-                // let roles: Vec<String> = settings::Role::iter().map(|role| role.name().to_owned()).collect();
-                // let roles: Vec<&str> = roles_string.iter().map(String::as_ref).collect();            
                 let mut csv_abs_path = ASSETS.clone();
                 csv_abs_path.push("hacking_variables.csv");
-                // let csv_data: Rc<Vec<HackingVariables>> = Rc::new(read_csv_data(csv_abs_path));
                 let csv_data: Rc<Vec<HackingVariables>> = Rc::new(crate::csv_data::get_hk_vars());
                 super::table_win::create::<&str,HackingVariables>(&app,"Hacking Variables",["Variable","Path","Category"] ,2 , categories,csv_data,Some([200,500,300]), Rc::clone(&window));
                         }));
