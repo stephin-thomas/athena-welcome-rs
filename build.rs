@@ -11,6 +11,11 @@ pub struct Record {
     pub tool: String,
     pub desc: String,
 }
+#[derive(Debug, serde::Deserialize, Clone)]
+pub struct ToolRecipe {
+    pub tool: String,
+    pub desc: String,
+}
 
 #[derive(Debug, serde::Deserialize, Clone)]
 pub struct HackingVariables {
@@ -33,7 +38,6 @@ where
         .filter(|rec| rec.is_ok())
         .map(|rec| rec.unwrap())
         .collect();
-    println!("Records collected");
     // println!("Records {:?}", records);
     return records;
 }
@@ -68,14 +72,34 @@ impl ToTokens for HackingVariables {
     }
 }
 
+impl ToTokens for ToolRecipe {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let tool = self.tool.clone();
+        let desc = self.desc.clone();
+        let tk_stream = quote! {
+            ToolRecipe{
+                tool: String::from(#tool),
+                desc: String::from(#desc),
+            }
+        };
+        tokens.extend(tk_stream);
+    }
+}
 pub fn main() {
+    println!("cargo:rerun-if-changed=assets");
+    let out_dir = PathBuf::from("src"); // Replace with your output directory
+    let final_file = out_dir.join("csv_data.rs");
+    println!("cargo:rerun-if-changed={:?}", final_file);
     // Define the path to your CSV file
     let role_csv_path = PathBuf::from("assets/roles.csv");
     let hacking_csv_path = PathBuf::from("assets/hacking_variables.csv");
+    let tools_recipe_csv_path = PathBuf::from("assets/tools_recipe.csv");
     let record_from_csv = read_csv_data::<Record>(role_csv_path);
+    let tools_recipe_csv = read_csv_data::<ToolRecipe>(tools_recipe_csv_path);
     let hacking_variables_from_csv = read_csv_data::<HackingVariables>(hacking_csv_path);
     let mut role_tools_tk_stream = TokenStream::new();
     let mut hacking_vars_tk_stream = TokenStream::new();
+    let mut tools_recipe_tk_stream = TokenStream::new();
     for record in record_from_csv.into_iter() {
         let strt = quote!(#record,);
         role_tools_tk_stream.extend(strt);
@@ -84,26 +108,33 @@ pub fn main() {
         let strt = quote!(#hacking_var,);
         hacking_vars_tk_stream.extend(strt);
     }
+    for tools_recipe in tools_recipe_csv.into_iter() {
+        let strt = quote!(#tools_recipe,);
+        tools_recipe_tk_stream.extend(strt);
+    }
     let final_ts = quote! {
-    use crate::utils::Record;
-    use crate::utils::HackingVariables;
+    //Auto generated file from build script do not modify
+       use crate::utils::Record;
+       use crate::utils::HackingVariables;
+       use crate::utils::ToolRecipe;
     pub fn get_roles()->Vec<Record>
-    {
-        let roles: Vec<Record> = vec![#role_tools_tk_stream];
-        return roles;}
+       {
+       let roles: Vec<Record> = vec![#role_tools_tk_stream];
+       return roles;}
     pub fn get_hk_vars()->Vec<HackingVariables>
-    {
-        let roles: Vec<HackingVariables> = vec![#hacking_vars_tk_stream];
-        return roles;}
-        };
+       {
+        let hacking_vars: Vec<HackingVariables> = vec![#hacking_vars_tk_stream];
+        return hacking_vars;}
+    pub fn get_tools_recipe()->Vec<ToolRecipe>
+       {
+        let tools_recipe: Vec<ToolRecipe> = vec![#tools_recipe_tk_stream];
+        return tools_recipe;}
+    };
 
     // println!("{}", final_ts.to_string());
-    let out_dir = PathBuf::from("src"); // Replace with your output directory
-    let final_file = out_dir.join("csv_data.rs");
     let syntax_tree =
         syn::parse_file(final_ts.to_string().as_str()).expect("Error parsing syntax tree");
-    let formatted = prettyplease::unparse(&syntax_tree);
-    print!("{}", formatted);
+    let formatted_syntax = prettyplease::unparse(&syntax_tree);
     let mut file = File::create(final_file).expect("Failed to create file");
-    write!(file, "{}", formatted).expect("Failed to write code");
+    write!(file, "{}", formatted_syntax).expect("Failed to write code");
 }

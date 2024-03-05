@@ -9,6 +9,8 @@ pub(crate) fn is_live_user() -> bool {
         true
     } else {
         false
+        // debug
+        // return true;
     }
 }
 pub(crate) fn get_startup_text() -> String {

@@ -1,0 +1,57 @@
+tool;desc
+armcord;Cross-platform, all-in-one voice and text chat application.
+asciinema,Record and share your terminal sessions.
+athena-cyber-hub,Running vulnerable labs and Cyber Security platforms.
+athena-theme-tweak,Switch to different Athena themes.
+athena-welcome,Welcome application that allows main security tools installation and mirrorlist update.
+bashtop;Resource monitor that shows usage and stats for processor, memory, disks, network and processes.
+bat,A 'cat' clone with syntax highlighting and Git integration.
+bfetch,SuperB general-purpose fetch displayer.
+bless;High-quality, full-featured hex editor.
+btrfs-assistant,GUI management tool to make managing a Btrfs filesystem easier.
+chat-gpt,ChatGPT Desktop application.
+cmatrix,Text flying in and out in a terminal like as seen in 'The Matrix' movie.
+code,Core engine of Visual Studio Code.
+convert;Convert between image formats as well as resize an image, blur, crop, despeckle, dither, draw on, flip, join, re-sample, and much more.
+cowsay;Print messages, warnings, or character strings with various animals and other creatures.
+cpc,Copy the entire content of the input file to the clipboard.
+devil,Quotes by devil eyes.
+downgrade;Downgrade one (or multiple) packages, by using the pacman cache or the Arch Rollback Machine.
+eog,Image viewer.
+figlet,Create ASCII text banners from terminal.
+fortune,Print out a random epigram.
+git;Fast, scalable, distributed revision control system.
+gnome-extensions,Gnome Extension manager.
+gnome-tweaks,Configure looks and functionality of your desktop.
+gparted;GNOME Partition Editor for creating, reorganizing, and deleting disk partitions.
+htb-tookit,Play Hack The Box directly on your system.
+la,An lsd -a alias
+ll,An lsd -alFh alias.
+lolcat,Concatenate like similar to 'cat' command and adds rainbow coloring to it.
+lsd,An ls command with a lot of pretty colors and some other stuff.
+myman,Text-mode videogame inspired by Namco's Pac-Man.
+nano,Simple terminal-based text editor.
+nautilus,File Manager.
+ncdu,Check which directories are using your disk space.
+neofetch,CLI system information tool written in BASH.
+nist-feed,NIST notifier about the newest published CVEs according to your filters.
+nvim,Vim-fork focused on extensibility and usability.
+nyancat,Nyancat rendered in your terminal.
+octopi,A powerful Pacman (Package Manager) front end using Qt libs.
+orca,Screen reader that provides access to the graphical desktop via speech and refreshable braille.
+pacman,Arch Linux package manager.
+pactree,Package dependency tree viewer.
+paru,Pacman wrapping AUR helper with lots of features and minimal interaction.
+pfetch,A pretty system information tool written in POSIX sh.
+probe;Probe for hardware, check operability and find drivers.
+pywhat;Identify anything. It easily lets you identifying emails, IP addresses, and more.
+sl,A steam locomotive running across your screen. Next time write 'ls' in a good manner.
+timeline,Cross-platform application for displaying and navigating events on a timeline.
+tmux;Terminal multiplexer that allow you switch easily between several programs in one terminal, detach them and reattach them to a different terminal.
+toilet,Display large colourful characters.
+tree,Recursive directory listing program that produces a depth indented listing of files.
+troubleshoot,Generate logs links about your system in order to investigate any issue.
+vim,Highly configurable text editor built to make creating and changing any kind of text very efficient.
+vnstat,Console-based network traffic monitor.
+xcp,An extended cp command.
+z,A smarter cd command for your terminal for BASH and ZSH.

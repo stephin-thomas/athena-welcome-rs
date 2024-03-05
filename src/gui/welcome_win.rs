@@ -3,7 +3,7 @@ use super::logic::{get_startup_text, get_widget_by_name, is_live_user, process_c
 use crate::runtime;
 use crate::settings;
 use crate::settings::Config;
-use crate::utils::{internet_connected, read_csv_data, start_cmd, HackingVariables, Record};
+use crate::utils::{internet_connected, start_cmd, HackingVariables, Record, ToolRecipe};
 use crate::ASSETS;
 use adw::glib::clone;
 use adw::prelude::*;
@@ -51,7 +51,6 @@ pub fn draw(
             let btn_id= btn.widget_name().to_string();
             println!("Shell started for {} {:?}",cmd,args);
             runtime().spawn(clone!(@strong toast_sen, @strong btn_dis_send=>async move {
-
             if args[0].as_str()=="sudo cyber-toolkit none"{
                 println!("No role selected");
             toast_sen.send("no role selected".to_owned()).await.expect("error opening channels");
@@ -78,6 +77,7 @@ pub fn draw(
         hbox_vec.push(hbox);
     }
     //Infobox
+    //Unused for now
     let infobutton = gtk::Button::new();
     infobutton.set_has_tooltip(true);
     let mut question_mark_icon = ASSETS.clone();
@@ -206,6 +206,14 @@ pub fn draw(
             300,
             50,
         );
+        btn_tool.connect_clicked(
+            clone!(@strong app,@strong window=>move |_| {
+                let mut csv_abs_path = ASSETS.clone();
+                csv_abs_path.push("tool_recipe.csv");
+                let csv_data: Rc<Vec<ToolRecipe>> = Rc::new(crate::csv_data::get_tools_recipe());
+                super::table_win::create::<&str,ToolRecipe>(&app,"Tool Recipe",&["Tool","Description"] ,0 , None,csv_data ,None, Rc::clone(&window));
+                        }));
+
         hbox_vec[0].append(&role_dropdown);
         hbox_vec[2].append(&btn_htb);
         hbox_vec[2].set_valign(gtk::Align::Center);
@@ -235,7 +243,7 @@ pub fn draw(
                 csv_abs_path.push("roles.csv");
                 // let csv_data: Rc<Vec<Record>> = Rc::new(read_csv_data(csv_abs_path));
                 let csv_data: Rc<Vec<Record>> = Rc::new(crate::csv_data::get_roles());
-                super::table_win::create::<&str,Record>(&app,"Role Tools",["Role","Tool","Description"] ,0 , roles,csv_data ,None, Rc::clone(&window));
+                super::table_win::create::<&str,Record>(&app,"Role Tools",&["Role","Tool","Description"] ,0 , Some(roles),csv_data ,None, Rc::clone(&window));
                 // super::role_tools_win::create(&app, configs.clone())),
                         }));
 
@@ -259,7 +267,7 @@ pub fn draw(
                 let mut csv_abs_path = ASSETS.clone();
                 csv_abs_path.push("hacking_variables.csv");
                 let csv_data: Rc<Vec<HackingVariables>> = Rc::new(crate::csv_data::get_hk_vars());
-                super::table_win::create::<&str,HackingVariables>(&app,"Hacking Variables",["Variable","Path","Category"] ,2 , categories,csv_data,Some([200,500,300]), Rc::clone(&window));
+                super::table_win::create::<&str,HackingVariables>(&app,"Hacking Variables",&["Variable","Path","Category"] ,2 , Some(categories),csv_data,Some(&[200,500,300]), Rc::clone(&window));
                         }));
 
         hbox_vec[4].append(&btn_role_tools);
