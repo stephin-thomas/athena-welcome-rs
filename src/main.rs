@@ -11,7 +11,6 @@ mod gui;
 mod settings;
 mod utils;
 use adw::prelude::*;
-use adw::{ActionRow, Application, ApplicationWindow, HeaderBar};
 const APP_ID: &str = "org.athenaos.athena-welcome";
 const APP_NAME: &str = "athena-welcome";
 
