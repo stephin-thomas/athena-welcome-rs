@@ -6,8 +6,8 @@ use crate::settings::Config;
 use crate::utils::{internet_connected, start_cmd, HackingVariables, Record, ToolRecipe};
 use crate::ASSETS;
 use adw::glib::clone;
-use adw::prelude::*;
 use adw::ApplicationWindow;
+use adw::{prelude::*, HeaderBar};
 use anyhow::{Context, Result};
 use gtk::glib;
 use gtk::Align;
@@ -34,7 +34,7 @@ pub fn draw(
             }));
         };
     });
-    let cmd_on_click = clone!(@strong toast,@strong toast_sen, @strong btn_dis_send =>
+    let cmd_on_click = clone!(@strong toast_sen, @strong btn_dis_send =>
         move |btn:&gtk::Button,widget_name:&str,cmd:&'static str,args:&'static [&'static str]| {
             btn.set_sensitive(false);
             btn.set_widget_name(widget_name);
@@ -44,7 +44,7 @@ pub fn draw(
                 let response = start_cmd(cmd, args ).await;
                 process_click(response,toast_sen ,btn_dis_send , btn_id).await;
                             }));});
-    let cmd_on_click_owned = clone!(@strong toast,@strong toast_sen, @strong btn_dis_send =>
+    let cmd_on_click_owned = clone!(@strong toast_sen, @strong btn_dis_send =>
         move |btn:&gtk::Button,widget_name:&str,cmd:&'static str, args:Vec<String>| {
             btn.set_sensitive(false);
             btn.set_widget_name(widget_name);
@@ -67,6 +67,7 @@ pub fn draw(
         .margin_top(10)
         .margin_end(10)
         .build();
+    vbox.append(&HeaderBar::new());
 
     let mut hbox_vec: Vec<gtk::Box> = Vec::with_capacity(10);
     for _ in 0..11 {
@@ -335,5 +336,8 @@ pub fn draw(
             }
         }
     });
+    // Combine the content in a box
+    // let content = Box::new(Orientation::Vertical, 0);
+    // Adwaitas' ApplicationWindow does not include a HeaderBar
     Ok(vbox)
 }

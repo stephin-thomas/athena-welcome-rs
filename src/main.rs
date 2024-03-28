@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 mod csv_data;
 use dirs;
 use gtk::glib;
-use gtk::prelude::*;
+// use gtk::prelude::*;
 use lazy_static::lazy_static;
 use std::path::PathBuf;
 use std::sync::OnceLock;
@@ -10,6 +10,8 @@ use tokio::runtime::Runtime;
 mod gui;
 mod settings;
 mod utils;
+use adw::prelude::*;
+use adw::{ActionRow, Application, ApplicationWindow, HeaderBar};
 const APP_ID: &str = "org.athenaos.athena-welcome";
 const APP_NAME: &str = "athena-welcome";
 
@@ -34,11 +36,11 @@ lazy_static! {
 fn main() -> glib::ExitCode {
     settings::Config::init().unwrap();
     // Create a new application
-    let app = adw::Application::builder().application_id(APP_ID).build();
+    let application = adw::Application::builder().application_id(APP_ID).build();
 
     // Connect to "activate" signal of `app`
-    app.connect_activate(gui::build_ui);
+    application.connect_activate(gui::build_ui);
+    application.run()
 
     // Run the application
-    app.run()
 }

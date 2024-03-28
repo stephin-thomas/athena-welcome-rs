@@ -21,7 +21,6 @@ pub(crate) fn build_ui(app: &adw::Application) {
     let window = ApplicationWindow::builder()
         .application(app)
         .title("Athena Welcome")
-        .default_height(250)
         .default_width(920)
         .icon_name(APP_NAME)
         .build();
