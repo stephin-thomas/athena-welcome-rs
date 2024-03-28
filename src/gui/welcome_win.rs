@@ -67,7 +67,8 @@ pub fn draw(
         .margin_top(10)
         .margin_end(10)
         .build();
-    vbox.append(&HeaderBar::new());
+    let parent_box = Box::builder().orientation(Orientation::Vertical).build();
+    parent_box.append(&HeaderBar::new());
 
     let mut hbox_vec: Vec<gtk::Box> = Vec::with_capacity(10);
     for _ in 0..11 {
@@ -212,7 +213,7 @@ pub fn draw(
                 let mut csv_abs_path = ASSETS.clone();
                 csv_abs_path.push("tool_recipe.csv");
                 let csv_data: Rc<Vec<ToolRecipe>> = Rc::new(crate::csv_data::get_tools_recipe());
-                super::table_win::create::<&str,ToolRecipe>(&app,"Tool Recipe",&["Tool","Description"] ,0 , None,csv_data ,None, Rc::clone(&window));
+                super::table_win::create::<&str,ToolRecipe>(&app,"Tool Recipe",&["Tool","Description"] ,0 , None,csv_data ,None);
                         }));
 
         hbox_vec[0].append(&role_dropdown);
@@ -244,7 +245,7 @@ pub fn draw(
                 csv_abs_path.push("roles.csv");
                 // let csv_data: Rc<Vec<Record>> = Rc::new(read_csv_data(csv_abs_path));
                 let csv_data: Rc<Vec<Record>> = Rc::new(crate::csv_data::get_roles());
-                super::table_win::create::<&str,Record>(&app,"Role Tools",&["Role","Tool","Description"] ,0 , Some(roles),csv_data ,None, Rc::clone(&window));
+                super::table_win::create::<&str,Record>(&app,"Role Tools",&["Role","Tool","Description"] ,0 , Some(roles),csv_data ,None);
                 // super::role_tools_win::create(&app, configs.clone())),
                         }));
 
@@ -268,7 +269,7 @@ pub fn draw(
                 let mut csv_abs_path = ASSETS.clone();
                 csv_abs_path.push("hacking_variables.csv");
                 let csv_data: Rc<Vec<HackingVariables>> = Rc::new(crate::csv_data::get_hk_vars());
-                super::table_win::create::<&str,HackingVariables>(&app,"Hacking Variables",&["Variable","Path","Category"] ,2 , Some(categories),csv_data,Some(&[200,500,300]), Rc::clone(&window));
+                super::table_win::create::<&str,HackingVariables>(&app,"Hacking Variables",&["Variable","Path","Category"] ,2 , Some(categories),csv_data,Some(&[200,500,300]), );
                         }));
 
         hbox_vec[4].append(&btn_role_tools);
@@ -339,5 +340,6 @@ pub fn draw(
     // Combine the content in a box
     // let content = Box::new(Orientation::Vertical, 0);
     // Adwaitas' ApplicationWindow does not include a HeaderBar
-    Ok(vbox)
+    parent_box.append(&vbox);
+    Ok(parent_box)
 }

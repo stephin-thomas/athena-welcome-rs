@@ -24,7 +24,6 @@ pub(crate) fn create<S, T>(
     filter_dropdown: Option<Vec<String>>,
     csv_data: Rc<Vec<T>>,
     col_width: Option<&[i32]>,
-    parent_win: Rc<ApplicationWindow>,
 ) where
     S: AsRef<Path>,
     T: AsArray,
@@ -41,8 +40,9 @@ pub(crate) fn create<S, T>(
         .default_height(250)
         .default_width(920)
         .icon_name(APP_NAME)
+        .modal(true)
         .build();
-    window.set_transient_for(Some(parent_win.as_ref()));
+    // window.set_transient_for(Some(parent_win.as_ref()));
     // let window = Rc::new(window);
     let roles_win = draw(csv_data, header, filter_index, filter_dropdown, col_width);
     window.set_content(Some(&roles_win));
@@ -53,8 +53,9 @@ pub(crate) fn create<S, T>(
         })
         .build();
     window.add_action_entries([action_close]);
-    window.set_parent(parent_win.as_ref());
-    window.set_destroy_with_parent(true);
+    // window.set_parent(parent_win.as_ref());
+    // window.set_destroy_with_parent(true);
+    // window.modal(true);
     // Present window
     window.present();
 }
@@ -119,6 +120,7 @@ where
         .orientation(Orientation::Vertical)
         // .homogeneous(true)
         .build();
+    vbox.append(&adw::HeaderBar::new());
     vbox.append(&scrolled_window);
 
     if let Some(filter_dropdown) = filter_dropdown {
@@ -158,8 +160,8 @@ where
         hbox.append(&filter_lbl);
         hbox.append(&role_dropdown);
         vbox.append(&hbox);
-    }
-
+    };
+    vbox.set_css_classes(&["boxed-list"]);
     return vbox;
 }
 
