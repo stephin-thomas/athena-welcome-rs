@@ -1,10 +1,10 @@
-use gtk::gio::{ListModel, ListStore};
 use gtk::{gio, glib::BoxedAnyObject, prelude::*, Orientation};
 use gtk::{Box, SingleSelection};
 
 use serde::de::DeserializeOwned;
 
 use std::cell::Ref;
+use std::path::Path;
 
 use crate::gui::gobjects;
 use crate::utils::AsArray;
@@ -16,7 +16,7 @@ use std::rc::Rc;
 use super::APP_NAME;
 use adw::gio::ActionEntry;
 
-pub(crate) fn create<T>(
+pub(crate) fn create<S, T>(
     app: &adw::Application,
     title: &str,
     header: &[&'static str],
@@ -25,6 +25,7 @@ pub(crate) fn create<T>(
     csv_data: Rc<Vec<T>>,
     col_width: Option<&[i32]>,
 ) where
+    S: AsRef<Path>,
     T: AsArray,
     T: DeserializeOwned,
     T: Clone,
@@ -73,6 +74,7 @@ where
 {
     // Create columns and add them to the table
     let store = filter_list(Rc::clone(&csv_data), "None".to_owned(), filter_index);
+
     let sel = gtk::SingleSelection::new(Some(store));
     let columnview = Rc::new(gtk::ColumnView::new(Some(sel)));
     if let Some(col_w) = col_width {
@@ -106,7 +108,6 @@ where
         };
         columnview.append_column(&col)
     }
-
     let column_view_rc = Rc::clone(&columnview);
     let scrolled_window = gtk::ScrolledWindow::builder()
         // .hscrollbar_policy(gtk::PolicyType::Never) // Disable horizontal scrolling
@@ -126,7 +127,7 @@ where
         let drop_down_str: Vec<&str> = filter_dropdown.iter().map(String::as_ref).collect();
         let role_dropdown = gtk::DropDown::from_strings(drop_down_str.as_slice());
         role_dropdown.set_size_request(200, 1);
-        role_dropdown.set_halign(gtk::Align::Center);
+        role_dropdown.set_halign(gtk::Align::End);
         let filter_dropdown_1 = filter_dropdown.clone();
         role_dropdown.connect_selected_notify(move |signal| {
             let sign = signal.selected();
@@ -144,8 +145,7 @@ where
                 )
                 .unwrap();
             let model = column_view_rc.model().unwrap();
-            let single_select_model: &ListStore = model.downcast().unwrap();
-            let list_view_model = single_select_model.downcast::<BoxedAnyObject>().unwrap();
+            let single_select_model: SingleSelection = model.downcast().unwrap();
             let store = filter_list(Rc::clone(&csv_data), (*role.1).to_owned(), filter_index);
             single_select_model.set_model(Some(&store));
             column_view_rc.set_model(Some(&single_select_model));

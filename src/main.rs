@@ -13,6 +13,7 @@ mod utils;
 use adw::prelude::*;
 const APP_ID: &str = "org.athenaos.athena-welcome";
 const APP_NAME: &str = "athena-welcome";
+
 fn runtime() -> &'static Runtime {
     static RUNTIME: OnceLock<Runtime> = OnceLock::new();
     RUNTIME.get_or_init(|| Runtime::new().expect("Setting up tokio runtime needs to succeed."))

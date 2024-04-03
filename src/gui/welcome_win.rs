@@ -9,7 +9,6 @@ use adw::glib::clone;
 use adw::ApplicationWindow;
 use adw::{prelude::*, HeaderBar};
 use anyhow::{Context, Result};
-use gtk::cairo::FontOptions;
 use gtk::glib;
 use gtk::Align;
 use gtk::{Box, Orientation};
@@ -214,7 +213,7 @@ pub fn draw(
                 let mut csv_abs_path = ASSETS.clone();
                 csv_abs_path.push("tool_recipe.csv");
                 let csv_data: Rc<Vec<ToolRecipe>> = Rc::new(crate::csv_data::get_tools_recipe());
-                super::table_win::create::<ToolRecipe>(&app,"Tool Recipe",&["Tool","Description"] ,0 , None,csv_data ,None);
+                super::table_win::create::<&str,ToolRecipe>(&app,"Tool Recipe",&["Tool","Description"] ,0 , None,csv_data ,None);
                         }));
 
         hbox_vec[0].append(&role_dropdown);
@@ -246,7 +245,7 @@ pub fn draw(
                 csv_abs_path.push("roles.csv");
                 // let csv_data: Rc<Vec<Record>> = Rc::new(read_csv_data(csv_abs_path));
                 let csv_data: Rc<Vec<Record>> = Rc::new(crate::csv_data::get_roles());
-                super::table_win::create::<Record>(&app,"Role Tools",&["Role","Tool","Description"] ,0 , Some(roles),csv_data ,None);
+                super::table_win::create::<&str,Record>(&app,"Role Tools",&["Role","Tool","Description"] ,0 , Some(roles),csv_data ,None);
                 // super::role_tools_win::create(&app, configs.clone())),
                         }));
 
@@ -270,7 +269,7 @@ pub fn draw(
                 let mut csv_abs_path = ASSETS.clone();
                 csv_abs_path.push("hacking_variables.csv");
                 let csv_data: Rc<Vec<HackingVariables>> = Rc::new(crate::csv_data::get_hk_vars());
-                super::table_win::create::<HackingVariables>(&app,"Hacking Variables",&["Variable","Path","Category"] ,2 , Some(categories),csv_data,Some(&[200,500,300]), );
+                super::table_win::create::<&str,HackingVariables>(&app,"Hacking Variables",&["Variable","Path","Category"] ,2 , Some(categories),csv_data,Some(&[200,500,300]), );
                         }));
 
         hbox_vec[4].append(&btn_role_tools);
@@ -315,7 +314,6 @@ pub fn draw(
     }
 
     // The main loop executes the asynchronous block
-    // glib::spawn_future_local(async move {
     glib::spawn_future_local(async move {
         loop {
             let t1 = btn_dis_receiver.recv();
