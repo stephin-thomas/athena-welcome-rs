@@ -104,7 +104,8 @@ where
             let row = gtk::Label::builder()
                 .justify(gtk::Justification::Left)
                 .wrap(true)
-                .xalign(0.0)
+                .halign(gtk::Align::Start)
+                // .xalign(0.0)
                 // .width_request(col_width)
                 .build();
             item.set_child(Some(&row));
@@ -125,10 +126,12 @@ where
     }
     let scrolled_window = gtk::ScrolledWindow::builder()
         // .hscrollbar_policy(gtk::PolicyType::Never) // Disable horizontal scrolling
+        .hscrollbar_policy(gtk::PolicyType::Automatic)
         .build();
 
     scrolled_window.set_child(Some(&columnview));
     scrolled_window.set_vexpand(true);
+    scrolled_window.set_hexpand(true);
     scrolled_window.set_min_content_height(250);
     let vbox = Box::builder()
         .orientation(Orientation::Vertical)
