@@ -86,14 +86,20 @@ impl ToTokens for ToolRecipe {
     }
 }
 pub fn main() {
+    glib_build_tools::compile_resources(
+        &["src/gui/assets"],
+        "src/gui/img_resource.xml",
+        "embed_assets.gresource",
+    );
+
     println!("cargo:rerun-if-changed=assets");
     let out_dir = PathBuf::from("src"); // Replace with your output directory
     let final_file = out_dir.join("csv_data.rs");
     println!("cargo:rerun-if-changed={:?}", final_file);
     // Define the path to your CSV file
-    let role_csv_path = PathBuf::from("assets/roles.csv");
-    let hacking_csv_path = PathBuf::from("assets/hacking_variables.csv");
-    let tools_recipe_csv_path = PathBuf::from("assets/tools_recipe.csv");
+    let role_csv_path = PathBuf::from("csv/roles.csv");
+    let hacking_csv_path = PathBuf::from("csv/hacking_variables.csv");
+    let tools_recipe_csv_path = PathBuf::from("csv/tools_recipe.csv");
     let record_from_csv = read_csv_data::<Record>(role_csv_path);
     let tools_recipe_csv = read_csv_data::<ToolRecipe>(tools_recipe_csv_path);
     let hacking_variables_from_csv = read_csv_data::<HackingVariables>(hacking_csv_path);

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/athenaos">
+    <file>htb.png</file>
+    <file>tools_recipe.png</file>
+  </gresource>
+</gresources>

@@ -4,13 +4,12 @@ use crate::runtime;
 use crate::settings;
 use crate::settings::Config;
 use crate::utils::{internet_connected, start_cmd, HackingVariables, Record, ToolRecipe};
-use crate::ASSETS;
 use adw::glib::clone;
 use adw::ApplicationWindow;
 use adw::{prelude::*, HeaderBar};
 use anyhow::{Context, Result};
+use gtk::glib;
 use gtk::Align;
-use gtk::{gio, glib};
 use gtk::{Box, Orientation};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -21,7 +20,6 @@ pub fn draw(
     toast: Rc<adw::ToastOverlay>,
     app: &adw::Application,
 ) -> Result<Box> {
-    println!("Assets path {:?}", ASSETS.as_path());
     //Channel to send signal to make a button sensitive after executing a command.
     let (btn_dis_send, btn_dis_receiver) = async_channel::bounded(1);
     //Messages send through will be shown as toasts.
@@ -34,6 +32,7 @@ pub fn draw(
             }));
         };
     });
+
     let cmd_on_click = clone!(@strong toast_sen, @strong btn_dis_send =>
         move |btn:&gtk::Button,widget_name:&str,cmd:&'static str,args:&'static [&'static str]| {
             btn.set_sensitive(false);
@@ -44,6 +43,7 @@ pub fn draw(
                 let response = start_cmd(cmd, args ).await;
                 process_click(response,toast_sen ,btn_dis_send , btn_id).await;
                             }));});
+
     let cmd_on_click_owned = clone!(@strong toast_sen, @strong btn_dis_send =>
         move |btn:&gtk::Button,widget_name:&str,cmd:&'static str, args:Vec<String>| {
             btn.set_sensitive(false);
@@ -58,6 +58,7 @@ pub fn draw(
                 let response = start_cmd(cmd, args.as_slice() ).await;
                 process_click(response,toast_sen ,btn_dis_send , btn_id).await;
                             }));});
+
     //Parent Box holding all the widgets.
     let vbox = Box::builder()
         .orientation(Orientation::Vertical)
@@ -67,6 +68,7 @@ pub fn draw(
         .margin_top(10)
         .margin_end(10)
         .build();
+
     let parent_box = Box::builder().orientation(Orientation::Vertical).build();
     parent_box.append(&HeaderBar::new());
 
@@ -80,16 +82,16 @@ pub fn draw(
     }
     //Infobox
     //Unused for now
-    let infobutton = gtk::Button::new();
-    infobutton.set_has_tooltip(true);
-    let mut question_mark_icon = ASSETS.clone();
-    question_mark_icon.push("/question.png");
+    // let infobutton = gtk::Button::new();
+    // infobutton.set_has_tooltip(true);
+    // let mut question_mark_icon = DATA.clone();
+    // question_mark_icon.push("/question.png");
 
-    let image = gtk::Image::builder()
-        .file(question_mark_icon.to_str().unwrap())
-        .pixel_size(30)
-        .build();
-    infobutton.set_child(Some(&image));
+    // let image = gtk::Image::builder()
+    //     .file(question_mark_icon.to_str().unwrap())
+    //     .pixel_size(30)
+    //     .build();
+    // infobutton.set_child(Some(&image));
 
     //Welcome Label
     let welcome_msg = gobjects::create_generic_label(gtk::Justification::Left);
@@ -190,29 +192,28 @@ pub fn draw(
         }
         ));
 
-        let mut btn_htb_icon = ASSETS.clone();
-        btn_htb_icon.push("htb.png");
+        // let mut btn_htb_icon = DATA.clone();
+        // btn_htb_icon.push("htb.png");
         let btn_htb = gobjects::gen_img_btn(
-            btn_htb_icon.to_str().unwrap(),
+            "/org/athenaos/htb.png",
             "<span size='large'><b>HTB Update</b></span>",
             300,
             50,
         );
         btn_htb.connect_clicked(clone!(@strong cmd_on_click =>
             move |btn|cmd_on_click(btn, "htb_upd", "shell-rocket", &["htb-toolkit -u"]);));
-        let mut btn_tool_icon = ASSETS.clone();
-        btn_tool_icon.push("tools_recipe.png");
+        // let mut btn_tool_icon = DATA.clone();
+        // btn_tool_icon.push("tools_recipe.png");
 
         let btn_tool = gobjects::gen_img_btn(
-            btn_tool_icon.to_str().unwrap(),
+            "/org/athenaos/tools_recipe.png",
             "<span size='large'><b>Tool Recipe</b></span>",
             300,
             50,
         );
         btn_tool.connect_clicked(
             clone!(@strong app,@strong window=>move |_| {
-                let mut csv_abs_path = ASSETS.clone();
-                csv_abs_path.push("tool_recipe.csv");
+
                 let csv_data: Rc<Vec<ToolRecipe>> = Rc::new(crate::csv_data::get_tools_recipe());
                 super::table_win::create::<&str,ToolRecipe>(&app,"Tool Recipe",&["Tool","Description"] ,0 , None,csv_data ,None);
                         }));
@@ -242,8 +243,6 @@ pub fn draw(
             clone!(@strong app,@strong window=>move |_| {
                 let roles: Vec<String> = settings::Role::iter().map(|role| role.name().to_owned()).collect();
                 // let roles: Vec<&str> = roles_string.iter().map(String::as_ref).collect();            
-                let mut csv_abs_path = ASSETS.clone();
-                csv_abs_path.push("roles.csv");
                 // let csv_data: Rc<Vec<Record>> = Rc::new(read_csv_data(csv_abs_path));
                 let csv_data: Rc<Vec<Record>> = Rc::new(crate::csv_data::get_roles());
                 super::table_win::create::<&str,Record>(&app,"Role Tools",&["Role","Tool","Description"] ,0 , Some(roles),csv_data ,None);
@@ -267,8 +266,6 @@ pub fn draw(
         btn_hacking_var.connect_clicked(
             clone!(@strong app,@strong window=>move |_| {
                 let categories: Vec<String>= vec!["None".to_owned(),"Generic".to_owned(),"Post Exploitation".to_owned(),"Web Analysis".to_owned(),"Password Cracking".to_owned()];
-                let mut csv_abs_path = ASSETS.clone();
-                csv_abs_path.push("hacking_variables.csv");
                 let csv_data: Rc<Vec<HackingVariables>> = Rc::new(crate::csv_data::get_hk_vars());
                 super::table_win::create::<&str,HackingVariables>(&app,"Hacking Variables",&["Variable","Path","Category"] ,2 , Some(categories),csv_data,Some(&[200,500,300]), );
                         }));

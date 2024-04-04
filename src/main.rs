@@ -2,7 +2,6 @@ use anyhow::{Context, Result};
 mod csv_data;
 use dirs;
 use gtk::glib;
-// use gtk::prelude::*;
 use lazy_static::lazy_static;
 use std::path::PathBuf;
 use std::sync::OnceLock;
@@ -28,11 +27,16 @@ fn get_app_config_dir() -> Result<PathBuf> {
 
 lazy_static! {
     pub static ref APP_CONFIG_DIR: PathBuf = get_app_config_dir().unwrap();
-    pub static ref ASSETS: PathBuf = PathBuf::from("./assets/");
+    // pub static ref DATA: PathBuf = get_app_data_dir().unwrap();
+    // pub static ref ASSETS: PathBuf = PathBuf::from("./assets/");
     pub static ref SETTINGS_PATH: PathBuf = APP_CONFIG_DIR.join("settings.conf");
 }
 
 fn main() -> glib::ExitCode {
+    // Register and include resources
+    gtk::gio::resources_register_include!("embed_assets.gresource")
+        .expect("Failed to register resources.");
+
     settings::Config::init().unwrap();
     // Create a new application
     let application = adw::Application::builder().application_id(APP_ID).build();

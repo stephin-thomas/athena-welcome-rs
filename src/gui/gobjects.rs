@@ -1,7 +1,6 @@
 use adw::prelude::*;
 // use adw::subclass::prelude::*;
 use adw::glib;
-use gtk::gdk_pixbuf;
 
 pub(crate) fn btn_n_ttp_label(
     text: &str,
@@ -22,7 +21,8 @@ pub(crate) fn gen_img_btn(
     height_req: i32,
 ) -> gtk::Button {
     let img = gtk::Image::builder()
-        .file(file)
+        // .file(file)
+        .resource(file)
         .pixel_size(height_req - 20)
         .halign(gtk::Align::End)
         .build();
