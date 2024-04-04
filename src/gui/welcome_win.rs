@@ -9,8 +9,8 @@ use adw::glib::clone;
 use adw::ApplicationWindow;
 use adw::{prelude::*, HeaderBar};
 use anyhow::{Context, Result};
-use gtk::glib;
 use gtk::Align;
+use gtk::{gio, glib};
 use gtk::{Box, Orientation};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -84,6 +84,7 @@ pub fn draw(
     infobutton.set_has_tooltip(true);
     let mut question_mark_icon = ASSETS.clone();
     question_mark_icon.push("/question.png");
+
     let image = gtk::Image::builder()
         .file(question_mark_icon.to_str().unwrap())
         .pixel_size(30)

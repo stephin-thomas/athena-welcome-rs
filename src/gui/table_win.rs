@@ -78,10 +78,10 @@ where
         let r: Ref<T> = record.borrow();
         let val_dropdown_ref=val_dropdown.borrow();
         if r.as_array()[filter_index] == *val_dropdown_ref|| *val_dropdown_ref == "None".to_owned()  {
-        println!("{}=={}\n",val_dropdown_ref, r.as_array()[filter_index]);
+        // println!("{}=={}\n",val_dropdown_ref, r.as_array()[filter_index]);
             return true;
         } else {
-        println!("{}!={}\n",val_dropdown_ref, r.as_array()[filter_index]);
+        // println!("{}!={}\n",val_dropdown_ref, r.as_array()[filter_index]);
             return false;
         }
     }));
@@ -183,10 +183,10 @@ where
         .orientation(Orientation::Horizontal)
         .homogeneous(true)
         .build();
-    let filter_lbl = gobjects::create_generic_label(gtk::Justification::Left);
-    filter_lbl.set_label("Filter");
-    hbox.append(&filter_lbl);
     if filter_dropdown.is_some() {
+        let filter_lbl = gobjects::create_generic_label(gtk::Justification::Left);
+        filter_lbl.set_label("Filter");
+        hbox.append(&filter_lbl);
         hbox.append(filter_dropdown.as_ref().unwrap());
     }
     vbox.append(&hbox);
