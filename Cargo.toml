@@ -5,26 +5,26 @@ edition = "2021"
 
 
 [dependencies]
-anyhow = "1.0.79"
+anyhow = "1.0.95"
 dirs = "5.0.1"
 gtk = { version = "0.7.3", package = "gtk4", features = ["v4_12"] }
-lazy_static = "1.4.0"
+lazy_static = "1.5.0"
 serde = {version = "1.0", features = ["derive"] }
-toml = "0.8.8"
-whoami = "1.4.1"
+toml = "0.8.19"
+whoami = "1.5.2"
 strum = "0.25"
 strum_macros = "0.25"
 adw = { version = "0.5.3", package = "libadwaita", features = ["v1_4"] }
 tokio = { version = "1", features = ["process", "rt-multi-thread","macros"] }
-async-channel = "2.2.0"
-open = "5.0.1"
+async-channel = "2.3.1"
+open = "5.3.2"
 isahc = "1.7.2"
 
 [build-dependencies]
-csv = "1.3.0"
-proc-macro2 = "1.0.78"
-quote = "1.0.35"
+csv = "1.3.1"
+proc-macro2 = "1.0.93"
+quote = "1.0.38"
 serde = {version = "1.0", features = ["derive"] }
-prettyplease = "0.2.16"
-syn = "2.0.52"
+prettyplease = "0.2.29"
+syn = "2.0.98"
 glib-build-tools = "0.19.0"
